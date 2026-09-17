@@ -1097,3 +1097,86 @@ main h3 {
   font-size: 15px !important;
   line-height: 1.3 !important;
 }
+
+
+/* Shared typography for the transfer report and the matching personal reports
+   (terms 1 and 2). Keep headings distinct while giving Thai table text enough
+   line spacing to remain legible inside the fixed A4 layout. */
+.transfer-single-page .document-school-name,
+.transfer-single-page .document-report-title,
+.score-summary-sheet .document-school-name,
+.score-summary-sheet .document-report-title {
+  font-size: 20px !important;
+  line-height: 1.3 !important;
+}
+
+.transfer-single-page .document-class-line,
+.transfer-single-page .student-heading-line,
+.score-summary-sheet .document-class-line,
+.score-summary-sheet .student-heading-line {
+  font-size: 18px !important;
+  line-height: 1.35 !important;
+}
+
+.transfer-single-page .transfer-report-table th,
+.score-summary-sheet .transfer-report-table th {
+  font-size: 16px !important;
+  line-height: 1.2 !important;
+}
+
+.transfer-single-page .transfer-report-table tbody td,
+.score-summary-sheet .transfer-report-table tbody td {
+  font-size: 15px !important;
+  line-height: 1.25 !important;
+}
+
+.transfer-single-page .transfer-gpa-table td,
+.score-summary-sheet .transfer-report-table tfoot td {
+  font-size: 16px !important;
+  font-weight: 700 !important;
+  line-height: 1.25 !important;
+}
+
+.transfer-single-page .transfer-summary-table th,
+.transfer-single-page .transfer-summary-table td,
+.score-summary-sheet .transfer-summary-table th,
+.score-summary-sheet .transfer-summary-table td {
+  font-size: 16px !important;
+  line-height: 1.25 !important;
+}
+
+.transfer-single-page .transfer-signatures,
+.transfer-single-page .transfer-signatures *,
+.score-summary-sheet .transfer-signatures,
+.score-summary-sheet .transfer-signatures * {
+  font-size: 15px !important;
+  line-height: 1.35 !important;
+}
+
+/* Detailed personal report (detail=1): compact header typography. */
+.evaluation-sheet .document-school-name,
+.evaluation-sheet .document-report-title {
+  font-size: 16px !important;
+  font-weight: 700 !important;
+  line-height: 1.3 !important;
+}
+
+.evaluation-sheet .document-class-line,
+.evaluation-sheet .student-heading-line {
+  font-size: 16px !important;
+  font-weight: 400 !important;
+  line-height: 1.35 !important;
+}
+
+/* Subject score report heading and student-name column. */
+.print-page.score-sheet .plain-form-title,
+.print-page.score-sheet .plain-form-context {
+  font-size: 15px !important;
+  font-weight: 400 !important;
+  line-height: 1.35 !important;
+}
+
+.print-page.score-sheet .score-table tbody td:nth-child(2) {
+  font-size: 14px !important;
+  line-height: 1.25 !important;
+}
