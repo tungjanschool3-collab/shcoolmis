@@ -13,12 +13,16 @@ const STATUS_OPTIONS: AttendanceStatus[] = ["", "/", "ข", "ล"];
 
 export default function AttendanceClient({
   classId,
+  schoolId,
+  isAdmin,
   academicYear,
   students,
   initialDays,
   initialRecords,
 }: {
   classId: string;
+  schoolId: number;
+  isAdmin: boolean;
   academicYear: string;
   students: Student[];
   initialDays: SchoolDay[];
@@ -39,6 +43,7 @@ export default function AttendanceClient({
     return map;
   });
   const [savingDays, setSavingDays] = useState(false);
+  const [syncingDays, setSyncingDays] = useState(false);
   const [savingRecords, setSavingRecords] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
 
@@ -106,6 +111,86 @@ export default function AttendanceClient({
     setDays((current) => [...current.filter((day) => !removedIds.has(day.id)), ...created].sort((a, b) => a.school_date.localeCompare(b.school_date)));
     setSavingDays(false);
     setMessage(`บันทึกวันมาเรียน ภาคเรียนที่ ${term} ปีการศึกษา ${selectedYear} แล้ว ${wanted.length} วัน`);
+  }
+
+  async function saveCalendarForAllClasses() {
+    setSyncingDays(true);
+    setMessage(null);
+
+    const wanted = [...selectedDates].filter((value) =>
+      months.some((month) => value.startsWith(`${month.year}-${String(month.month + 1).padStart(2, "0")}`))
+    );
+    const { data: classrooms, error: classError } = await supabase
+      .from("classes")
+      .select("id")
+      .eq("school_id", schoolId)
+      .eq("academic_year", String(selectedYear));
+
+    if (classError) {
+      setSyncingDays(false);
+      setMessage(`อ่านรายชื่อห้องเรียนไม่สำเร็จ: ${classError.message}`);
+      return;
+    }
+
+    const classIds = (classrooms ?? []).map((classroom) => classroom.id as string);
+    if (!classIds.length) {
+      setSyncingDays(false);
+      setMessage(`ไม่พบห้องเรียนปีการศึกษา ${selectedYear}`);
+      return;
+    }
+
+    const { data: allDays, error: daysError } = await supabase
+      .from("school_days")
+      .select("*")
+      .in("class_id", classIds)
+      .eq("term", term);
+
+    if (daysError) {
+      setSyncingDays(false);
+      setMessage(`อ่านปฏิทินห้องเรียนไม่สำเร็จ: ${daysError.message}`);
+      return;
+    }
+
+    const existing = ((allDays as SchoolDay[]) ?? []).filter((day) =>
+      selectedMonthPrefixes.has(day.school_date.slice(0, 7))
+    );
+    const wantedSet = new Set(wanted);
+    const removed = existing.filter((day) => !wantedSet.has(day.school_date));
+
+    if (removed.length) {
+      const { error } = await supabase.from("school_days").delete().in("id", removed.map((day) => day.id));
+      if (error) {
+        setSyncingDays(false);
+        setMessage(`ปรับปฏิทินทุกห้องไม่สำเร็จ: ${error.message}`);
+        return;
+      }
+    }
+
+    const existingKeys = new Set(existing.map((day) => `${day.class_id}:${day.school_date}`));
+    const additions = classIds.flatMap((targetClassId) =>
+      wanted
+        .filter((schoolDate) => !existingKeys.has(`${targetClassId}:${schoolDate}`))
+        .map((school_date) => ({ class_id: targetClassId, school_date, term }))
+    );
+
+    if (additions.length) {
+      const { error } = await supabase.from("school_days").insert(additions);
+      if (error) {
+        setSyncingDays(false);
+        setMessage(`เพิ่มวันเปิดเรียนให้ทุกห้องไม่สำเร็จ: ${error.message}`);
+        return;
+      }
+    }
+
+    const { data: refreshedDays } = await supabase
+      .from("school_days")
+      .select("*")
+      .eq("class_id", classId)
+      .order("school_date");
+    if (refreshedDays) setDays(refreshedDays as SchoolDay[]);
+
+    setSyncingDays(false);
+    setMessage(`บันทึกปฏิทินกลาง ${wanted.length} วัน ให้ห้องเรียนปี ${selectedYear} ครบ ${classIds.length} ห้องแล้ว`);
   }
 
   function setAttendance(studentId: string, schoolDayId: string, status: AttendanceStatus) {
@@ -190,9 +275,24 @@ export default function AttendanceClient({
             <button onClick={selectWeekdays} className="rounded-lg border border-emerald-300 bg-emerald-50 px-3 py-2 text-emerald-700">เลือกจันทร์-ศุกร์</button>
             <button onClick={clearTerm} className="rounded-lg border px-3 py-2">ล้างภาคเรียนนี้</button>
             <button onClick={saveCalendar} disabled={savingDays} className="rounded-lg bg-indigo-600 px-4 py-2 font-medium text-white disabled:opacity-50">{savingDays ? "กำลังบันทึก..." : "บันทึกปฏิทิน"}</button>
+            {isAdmin && (
+              <button
+                onClick={saveCalendarForAllClasses}
+                disabled={syncingDays || savingDays}
+                className="rounded-lg bg-amber-500 px-4 py-2 font-medium text-white hover:bg-amber-600 disabled:opacity-50"
+              >
+                {syncingDays ? "กำลังใช้กับทุกห้อง..." : "บันทึกและใช้กับทุกห้อง"}
+              </button>
+            )}
           </div>
         </div>
-        <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
+        {isAdmin && (
+          <p className="mb-3 rounded-lg bg-amber-50 px-3 py-2 text-sm text-amber-800">
+            ผู้ดูแลระบบสามารถกำหนดวันเปิดเรียนกลางให้ทุกห้องในโรงเรียนที่อยู่ในปีการศึกษาเดียวกันได้
+          </p>
+        )}
+        <div className="overflow-x-auto pb-2">
+          <div className="grid min-w-[1080px] grid-flow-col auto-cols-fr gap-3">
           {months.map((month) => {
             const count = daysInMonth(month.year, month.month);
             const firstDay = new Date(Date.UTC(month.year, month.month, 1)).getUTCDay();
@@ -213,6 +313,7 @@ export default function AttendanceClient({
               </div>
             );
           })}
+          </div>
         </div>
       </section>
 
