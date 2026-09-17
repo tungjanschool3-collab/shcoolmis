@@ -88,7 +88,11 @@ export function parseCompetencyLevelsCsv(text: string): ImportedCompetencyLevel[
   const columns = {
     order: findColumn(headers, ["ที่", "ลำดับ", "order"]),
     subject: findColumn(headers, ["รายวิชาหลักสูตรใหม่2568", "ชื่อวิชา", "รายวิชา", "subject"]),
-    competency: findColumn(headers, ["ความสามารถของผู้เรียนเมื่อจบชั้นประถมศึกษาปีที่6", "ความสามารถชั้นปี", "ความสามารถ", "competency"]),
+    competency: (() => {
+      const exact = findColumn(headers, ["ความสามารถชั้นปี", "ความสามารถ", "competency"]);
+      if (exact >= 0) return exact;
+      return headers.findIndex((header) => header.startsWith(normalizeHeader("ความสามารถของผู้เรียนเมื่อจบ")));
+    })(),
     beginner: findColumn(headers, ["เริ่มต้น", "beginner"]),
     developing: findColumn(headers, ["พัฒนา", "developing"]),
     proficient: findColumn(headers, ["ชำนาญตามเกณฑ์ที่คาดหวัง", "ชำนาญ", "proficient"]),
