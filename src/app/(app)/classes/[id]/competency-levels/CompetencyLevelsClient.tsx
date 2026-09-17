@@ -8,8 +8,17 @@ import { decodeCsv, downloadCsvTemplate, parseCompetencyLevelsCsv } from "@/lib/
 
 type Row = Partial<SubjectCompetencyLevel> & { _key: string; _dirty?: boolean; _new?: boolean };
 
-const TEXT_FIELDS: { key: keyof SubjectCompetencyLevel; label: string; width: string }[] = [
-  { key: "competency_text", label: "ความสามารถของผู้เรียนเมื่อจบ ชั้นประถมศึกษาปีที่ 6", width: "min-w-[360px]" },
+function fullGradeLevel(value: string): string {
+  const gradeLevel = value.trim();
+  const primary = gradeLevel.match(/^ป\.?\s*(\d+)$/i);
+  if (primary) return `ชั้นประถมศึกษาปีที่ ${primary[1]}`;
+  const secondary = gradeLevel.match(/^ม\.?\s*(\d+)$/i);
+  if (secondary) return `ชั้นมัธยมศึกษาปีที่ ${secondary[1]}`;
+  if (!gradeLevel || gradeLevel.startsWith("ชั้น")) return gradeLevel;
+  return `ชั้น${gradeLevel}`;
+}
+
+const OTHER_TEXT_FIELDS: { key: keyof SubjectCompetencyLevel; label: string; width: string }[] = [
   { key: "beginner_text", label: "เริ่มต้น", width: "min-w-[300px]" },
   { key: "developing_text", label: "พัฒนา", width: "min-w-[300px]" },
   { key: "proficient_text", label: "ชำนาญ (ตามเกณฑ์ที่คาดหวัง)", width: "min-w-[300px]" },
@@ -18,9 +27,11 @@ const TEXT_FIELDS: { key: keyof SubjectCompetencyLevel; label: string; width: st
 
 export default function CompetencyLevelsClient({
   classId,
+  gradeLevel,
   initial,
 }: {
   classId: string;
+  gradeLevel: string;
   initial: SubjectCompetencyLevel[];
 }) {
   const supabase = createClient();
@@ -29,6 +40,11 @@ export default function CompetencyLevelsClient({
   const [message, setMessage] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { requestDelete, deletePasswordDialog } = usePasswordDelete();
+  const competencyLabel = `ความสามารถของผู้เรียนเมื่อจบ ${fullGradeLevel(gradeLevel)}`.trim();
+  const textFields: { key: keyof SubjectCompetencyLevel; label: string; width: string }[] = [
+    { key: "competency_text", label: competencyLabel, width: "min-w-[360px]" },
+    ...OTHER_TEXT_FIELDS,
+  ];
 
   function update(key: string, field: keyof SubjectCompetencyLevel, value: string | number) {
     setRows((current) =>
@@ -77,7 +93,7 @@ export default function CompetencyLevelsClient({
 
   function downloadTemplate() {
     downloadCsvTemplate("competency-levels-2568-template.csv", [
-      ["ที่", "รายวิชาหลักสูตรใหม่ 2568", "ความสามารถของผู้เรียนเมื่อจบ ชั้นประถมศึกษาปีที่ 6", "เริ่มต้น", "พัฒนา", "ชำนาญ", "เชี่ยวชาญ"],
+      ["ที่", "รายวิชาหลักสูตรใหม่ 2568", competencyLabel, "เริ่มต้น", "พัฒนา", "ชำนาญ", "เชี่ยวชาญ"],
       ["1", "ภาษาไทย", "ผู้เรียนวิเคราะห์และเลือกข้อมูลอย่างมีเหตุผล", "เริ่มสื่อสารความคิดเห็น", "สื่อสารได้เป็นระบบ", "วิเคราะห์และสื่อสารอย่างมีเหตุผล", "ประยุกต์ใช้ได้อย่างเชี่ยวชาญ"],
     ]);
   }
@@ -190,7 +206,7 @@ export default function CompetencyLevelsClient({
               <th className="sticky left-16 z-20 min-w-[220px] bg-slate-50 px-2 py-3">
                 รายวิชาหลักสูตรใหม่ 2568
               </th>
-              {TEXT_FIELDS.map((field) => (
+              {textFields.map((field) => (
                 <th key={field.key} className={`${field.width} px-2 py-3`}>{field.label}</th>
               ))}
               <th className="w-20 px-2 py-3">ลดแถว</th>
@@ -216,7 +232,7 @@ export default function CompetencyLevelsClient({
                     className="w-full resize-y rounded border border-slate-200 px-2 py-2"
                   />
                 </td>
-                {TEXT_FIELDS.map((field) => (
+                {textFields.map((field) => (
                   <td key={field.key} className="px-2 py-2">
                     <textarea
                       rows={5}
