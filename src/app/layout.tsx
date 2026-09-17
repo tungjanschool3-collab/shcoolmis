@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import { Sarabun } from "next/font/google";
+import { Suspense } from "react";
+import RouteLoadingOverlay from "@/components/RouteLoadingOverlay";
 import "./globals.css";
 
 const sarabun = Sarabun({
@@ -20,7 +22,12 @@ export default function RootLayout({
 }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="th" className={sarabun.variable}>
-      <body>{children}</body>
+      <body>
+        <Suspense fallback={null}>
+          <RouteLoadingOverlay />
+        </Suspense>
+        {children}
+      </body>
     </html>
   );
 }
