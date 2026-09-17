@@ -964,12 +964,10 @@ main h3 {
 .print-page.score-sheet .plain-form-context,
 .print-page.score-sheet .score-table th,
 .print-page.score-sheet .score-table td {
-  font-family: var(--font-print-thai) !important;
-  font-size: 16px !important;
+  font-family: var(--font-print-thai) !important;  font-size: 15px !important;
 }
-/* Same heading hierarchy as the rest of the report pages: title 20px, class line 18px. */
-.print-page.score-sheet .plain-form-title {
-  font-size: 20px !important;
+/* Subject-score report: 15px content/table, 16px title, 18px class line. */
+.print-page.score-sheet .plain-form-title {  font-size: 16px !important;
 }
 .print-page.score-sheet .plain-form-context {
   font-size: 18px !important;
