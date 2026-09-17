@@ -19,6 +19,17 @@ export default function Sidebar({ profile, activeSchool }: { profile: Profile; a
   const [open, setOpen] = useState(false);
 
   const items = nav.filter((n) => !n.adminOnly || profile.role === "admin");
+  const classMatch = pathname.match(/^\/classes\/([^/]+)/);
+  const reportsHref = classMatch ? `/classes/${classMatch[1]}/reports` : null;
+  if (reportsHref) {
+    const classesIndex = items.findIndex((item) => item.href === "/classes");
+    items.splice(classesIndex + 1, 0, {
+      href: reportsHref,
+      label: "รายงาน/การพิมพ์",
+      icon: "🖨️",
+      adminOnly: false,
+    });
+  }
 
   return (
     <>
@@ -48,7 +59,12 @@ export default function Sidebar({ profile, activeSchool }: { profile: Profile; a
 
         <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
           {items.map((n) => {
-            const active = pathname === n.href || pathname.startsWith(n.href + "/");
+            const isReportsItem = n.href === reportsHref;
+            const active = isReportsItem
+              ? pathname.startsWith(n.href)
+              : n.href === "/classes"
+                ? pathname.startsWith("/classes") && !pathname.includes("/reports")
+                : pathname === n.href || pathname.startsWith(n.href + "/");
             return (
               <Link
                 key={n.href}
