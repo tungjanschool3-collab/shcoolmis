@@ -7,6 +7,14 @@
   --font-print-thai: var(--font-thai);
 }
 
+/* Keep every generated PDF page on one typeface. The universal descendant
+   rule also covers form controls, table cells, signatures, and nested report
+   components that may otherwise fall back to a browser or system font. */
+.print-page,
+.print-page * {
+  font-family: var(--font-print-thai) !important;
+}
+
 html,
 body {
   font-family: var(--font-thai);
