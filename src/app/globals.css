@@ -937,7 +937,7 @@ main h3 {
   line-height: 1.25 !important;
 }
 .roster-sheet .roster-table th:nth-child(4),
-.roster-sheet .roster-table td:nth-child(4) {
+.roster-sheet .roster-table tbody td:nth-child(4) {
   font-size: 14px !important;
 }
 .roster-sheet .plain-form-title,
