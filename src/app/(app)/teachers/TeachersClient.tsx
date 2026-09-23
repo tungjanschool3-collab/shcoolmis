@@ -4,7 +4,6 @@ import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import type { Profile } from "@/lib/types";
 import { createTeacher, resetPassword, setActive, deleteTeacher } from "./actions";
-import { LOGIN_DOMAIN } from "@/lib/username";
 import { usePasswordDelete } from "@/components/PasswordDeleteGuard";
 
 export default function TeachersClient({ teachers }: { teachers: Profile[] }) {
@@ -90,25 +89,15 @@ export default function TeachersClient({ teachers }: { teachers: Profile[] }) {
           className="bg-white rounded-xl shadow-sm border border-slate-100 p-5 grid sm:grid-cols-2 gap-4"
         >
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">ชื่อผู้ใช้ *</label>
+            <label className="block text-sm font-medium text-slate-700 mb-1">อีเมลจริง *</label>
             <input
-              name="username"
+              name="email"
+              type="email"
               required
               className="w-full rounded-lg border border-slate-300 px-3 py-2"
-              placeholder="เช่น sopitra"
+              placeholder="teacher@school.ac.th"
             />
-            <p className="text-xs text-slate-400 mt-1">ใช้เข้าสู่ระบบ (a-z 0-9 . _ -)</p>
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">รหัสผ่าน *</label>
-            <input
-              name="password"
-              type="text"
-              required
-              minLength={6}
-              className="w-full rounded-lg border border-slate-300 px-3 py-2"
-              placeholder="อย่างน้อย 6 ตัว"
-            />
+            <p className="text-xs text-slate-400 mt-1">ระบบจะส่งลิงก์เชิญให้ครูตั้งรหัสผ่านเอง</p>
           </div>
           <div>
             <label className="block text-sm font-medium text-slate-700 mb-1">ชื่อ-นามสกุล</label>
@@ -130,7 +119,7 @@ export default function TeachersClient({ teachers }: { teachers: Profile[] }) {
             <label className="block text-sm font-medium text-slate-700 mb-1">สิทธิ์</label>
             <select name="role" className="w-full rounded-lg border border-slate-300 px-3 py-2">
               <option value="teacher">ครู</option>
-              <option value="admin">ผู้ดูแลระบบ</option>
+              <option value="school_admin">ผู้ดูแลโรงเรียน</option>
             </select>
           </div>
           <div className="sm:col-span-2">
@@ -165,10 +154,10 @@ export default function TeachersClient({ teachers }: { teachers: Profile[] }) {
                 <td className="px-4 py-3">
                   <span
                     className={`rounded-full px-2 py-0.5 text-xs ${
-                      t.role === "admin" ? "bg-purple-100 text-purple-700" : "bg-sky-100 text-sky-700"
+                      ["platform_owner", "school_admin", "admin"].includes(t.role) ? "bg-purple-100 text-purple-700" : "bg-sky-100 text-sky-700"
                     }`}
                   >
-                    {t.role === "admin" ? "ผู้ดูแลระบบ" : "ครู"}
+                    {t.role === "platform_owner" ? "ผู้ดูแลระบบกลาง" : ["school_admin", "admin"].includes(t.role) ? "ผู้ดูแลโรงเรียน" : "ครู"}
                   </span>
                 </td>
                 <td className="px-4 py-3">
@@ -203,7 +192,7 @@ export default function TeachersClient({ teachers }: { teachers: Profile[] }) {
       </div>
 
       <p className="text-xs text-slate-400">
-        หมายเหตุ: การเข้าสู่ระบบใช้ “ชื่อผู้ใช้” (ระบบต่อโดเมน @{LOGIN_DOMAIN} ให้อัตโนมัติ ผู้ใช้ไม่ต้องพิมพ์)
+        ครูจะได้รับอีเมลเชิญและตั้งรหัสผ่านด้วยตนเอง
       </p>
     </div>
   );

@@ -32,8 +32,8 @@ export async function middleware(request: NextRequest) {
   }
 
   const path = request.nextUrl.pathname;
-  const isAuthRoute = path === "/login";
-  const isPublic = path === "/login" || path.startsWith("/_next") || path === "/favicon.ico";
+  const isAuthRoute = path === "/login" || path === "/signup";
+  const isPublic = isAuthRoute || path.startsWith("/auth/") || path.startsWith("/_next") || path === "/favicon.ico";
 
   if (!user && !isPublic) {
     const url = request.nextUrl.clone();
@@ -41,7 +41,7 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(url);
   }
 
-  if (user && isAuthRoute) {
+  if (user && path === "/login") {
     const url = request.nextUrl.clone();
     url.pathname = "/dashboard";
     return NextResponse.redirect(url);

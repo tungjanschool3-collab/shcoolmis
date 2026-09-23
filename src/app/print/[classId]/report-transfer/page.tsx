@@ -96,7 +96,7 @@ export default async function ReportTransferPage({
   const selectedTerm = (term === "2" || term === "year" ? term : "1") as TransferTerm;
   const bundle = await loadClassBundle(classId);
   const { school, cls, students } = bundle;
-  const year = school?.academic_year || cls?.academic_year || "";
+  const year = cls?.academic_year || school?.academic_year || "";
 
   const reports = students.map((s) => computeTransferReport(bundle, s, selectedTerm));
   const ranks = rankByGpaTransfer(reports);

@@ -1,7 +1,7 @@
 import { requireProfile } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
-import type { ClassRoom, Profile } from "@/lib/types";
-import ClassesClient from "./ClassesClient";
+import type { AcademicYear } from "@/lib/types";
+import AcademicYearsClient from "./AcademicYearsClient";
 import { getActiveSchool } from "@/lib/school-context";
 
 export default async function ClassesPage() {
@@ -9,41 +9,12 @@ export default async function ClassesPage() {
   const supabase = await createClient();
   const activeSchool = await getActiveSchool(profile);
 
-  const { data: classes } = await supabase
-    .from("classes")
-    .select("*")
-    .eq("school_id", activeSchool?.id ?? -1)
-    .order("academic_year", { ascending: false })
-    .order("grade_level", { ascending: true })
-    .order("room", { ascending: true });
+  const { data: years } = await supabase.from("academic_years").select("*").eq("school_id", activeSchool?.id ?? -1).order("year", { ascending: false });
+  const { data: classes } = await supabase.from("classes").select("academic_year_id").eq("school_id", activeSchool?.id ?? -1);
+  const counts = ((classes as { academic_year_id: string | null }[]) ?? []).reduce<Record<string, number>>((result, row) => {
+    if (row.academic_year_id) result[row.academic_year_id] = (result[row.academic_year_id] || 0) + 1;
+    return result;
+  }, {});
 
-  // นับจำนวนนักเรียนต่อห้อง
-  const list = (classes as ClassRoom[]) ?? [];
-  const counts: Record<string, number> = {};
-  if (list.length) {
-    const { data: students } = await supabase.from("students").select("class_id");
-    for (const s of (students as { class_id: string }[]) ?? []) {
-      counts[s.class_id] = (counts[s.class_id] || 0) + 1;
-    }
-  }
-
-  let teachers: Profile[] = [];
-  if (profile.role === "admin") {
-    const { data } = await supabase
-      .from("profiles")
-      .select("*")
-      .eq("school_id", activeSchool?.id ?? -1)
-      .eq("role", "teacher")
-      .order("full_name", { ascending: true });
-    teachers = (data as Profile[]) ?? [];
-  }
-
-  return (
-    <ClassesClient
-      profile={profile}
-      classes={list}
-      counts={counts}
-      teachers={teachers}
-    />
-  );
+  return <AcademicYearsClient profile={profile} years={(years as AcademicYear[]) ?? []} counts={counts} />;
 }

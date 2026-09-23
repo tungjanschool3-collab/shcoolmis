@@ -9,6 +9,7 @@ export default async function DashboardPage() {
   const supabase = await createClient();
 
   const s = (await getActiveSchool(profile)) as School | null;
+  const isAdmin = ["platform_owner", "school_admin", "admin"].includes(profile.role);
 
   const { data: schoolClasses, count: classCount } = await supabase
     .from("classes")
@@ -20,7 +21,7 @@ export default async function DashboardPage() {
     : { count: 0 };
 
   let teacherCount: number | null = null;
-  if (profile.role === "admin") {
+  if (isAdmin) {
     const { count } = await supabase
       .from("profiles")
       .select("*", { count: "exact", head: true })
@@ -32,7 +33,7 @@ export default async function DashboardPage() {
   const stats = [
     { label: "ห้องเรียน", value: classCount ?? 0, href: "/classes", icon: "🏫" },
     { label: "นักเรียนทั้งหมด", value: studentCount ?? 0, href: "/classes", icon: "🧑‍🎓" },
-    ...(profile.role === "admin"
+    ...(isAdmin
       ? [{ label: "ครูผู้ใช้งาน", value: teacherCount ?? 0, href: "/teachers", icon: "👩‍🏫" }]
       : []),
   ];
@@ -45,11 +46,10 @@ export default async function DashboardPage() {
         </h1>
         <p className="text-slate-500 mt-1">
           {s?.name ? `โรงเรียน${s.name}` : "ยังไม่ได้ตั้งค่าข้อมูลโรงเรียน"}
-          {s?.academic_year ? ` · ปีการศึกษา ${s.academic_year}` : ""}
         </p>
       </div>
 
-      {profile.role === "admin" && !s?.name && (
+      {isAdmin && !s?.name && (
         <div className="bg-amber-50 border border-amber-200 text-amber-800 rounded-xl p-4 text-sm">
           เริ่มต้นใช้งาน: กรุณา{" "}
           <Link href="/settings" className="underline font-medium">

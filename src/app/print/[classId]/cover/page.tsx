@@ -110,7 +110,7 @@ export default async function CoverPage({
                 <td className="border-b border-dotted border-slate-500">{school?.area}</td>
                 <td className="py-0.5 pl-3">ปีการศึกษา</td>
                 <td className="border-b border-dotted border-slate-500">
-                  {school?.academic_year || cls?.academic_year} &nbsp; จำนวนนักเรียน {students.length} คน
+                  {cls?.academic_year || school?.academic_year} &nbsp; จำนวนนักเรียน {students.length} คน
                 </td>
               </tr>
             </tbody>
@@ -242,7 +242,7 @@ export default async function CoverPage({
         {Array.from({ length: Math.max(1, Math.ceil(students.length / 30)) }, (_, pageIndex) => (<div key={pageIndex} className="print-page roster-sheet">
           <header className="plain-form-header roster-form-header">
             <div className="plain-form-title">รายชื่อนักเรียน</div>
-            <div className="plain-form-context">{cls?.grade_level} {cls?.room ? `ห้อง ${cls.room}` : ""} โรงเรียน{school?.name} ปีการศึกษา {school?.academic_year || cls?.academic_year}</div>
+            <div className="plain-form-context">{cls?.grade_level} {cls?.room ? `ห้อง ${cls.room}` : ""} โรงเรียน{school?.name} ปีการศึกษา {cls?.academic_year || school?.academic_year}</div>
           </header>
           <table className="report-table roster-table">
             <thead>

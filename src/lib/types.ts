@@ -1,4 +1,4 @@
-export type Role = "admin" | "teacher";
+export type Role = "platform_owner" | "school_admin" | "admin" | "teacher" | "pending";
 
 export type Profile = {
   id: string;
@@ -49,6 +49,7 @@ export type ClassRoom = {
   id: string;
   school_id: number;
   academic_year: string;
+  academic_year_id: string | null;
   grade_level: string;
   room: string;
   homeroom_teacher_id: string | null;
@@ -77,6 +78,18 @@ export type Student = {
   expected_activity_level: string;
   expected_characteristic_level: string;
   expected_competency_level: string;
+  created_at: string;
+};
+
+export type AcademicYear = {
+  id: string;
+  school_id: number;
+  year: string;
+  status: "active" | "closed" | "deleting";
+  starts_on: string | null;
+  ends_on: string | null;
+  closed_at: string | null;
+  created_by: string | null;
   created_at: string;
 };
 

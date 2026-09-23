@@ -3,6 +3,19 @@
 ระบบบันทึกผลการเรียนและออกรายงาน ปพ.5 สำหรับครูประจำชั้น — รองรับหลายห้องเรียน
 สร้างด้วย **Next.js + Supabase + Vercel**
 
+## Migration ระบบหลายโรงเรียนและปีการศึกษา
+
+ก่อน Deploy รุ่นที่รองรับการสมัครด้วยอีเมลจริง ให้สำรองฐานข้อมูลและรัน
+`supabase/migrations/20260923090000_multi_tenant_academic_years.sql` บน Staging ก่อน Production
+จากนั้นตั้งค่า Supabase Auth ให้ยืนยันอีเมล และเพิ่ม URL ต่อไปนี้ใน Redirect URLs:
+
+- `https://shcoolmis.vercel.app/auth/callback`
+- URL สำหรับ Preview/Staging ที่ใช้งานจริง
+
+ตั้งค่า `NEXT_PUBLIC_SITE_URL=https://shcoolmis.vercel.app` บน Vercel และกำหนด Custom SMTP
+สำหรับอีเมลยืนยันและอีเมลเชิญ บัญชี `tiamobew@gmail.com` ที่ยืนยันอีเมลแล้วจะได้รับบทบาท
+ผู้ดูแลระบบกลางโดย Migration/Trigger นี้ บัญชีเดิมยังเข้าสู่ระบบด้วยชื่อผู้ใช้ได้ในช่วงย้ายข้อมูล
+
 ## ความสามารถ
 
 - 🔐 เข้าสู่ระบบด้วยชื่อผู้ใช้ + รหัสผ่าน (ผู้ดูแลเริ่มต้น `admin` / `044357246`)

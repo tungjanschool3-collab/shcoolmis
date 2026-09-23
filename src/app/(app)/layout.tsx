@@ -1,9 +1,11 @@
 import { requireProfile } from "@/lib/auth";
 import Sidebar from "@/components/Sidebar";
 import { getActiveSchool } from "@/lib/school-context";
+import { redirect } from "next/navigation";
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
   const profile = await requireProfile();
+  if (profile.role === "pending") redirect("/pending");
   const activeSchool = await getActiveSchool(profile);
 
   return (

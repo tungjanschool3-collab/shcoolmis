@@ -8,7 +8,6 @@ import { usePasswordDelete } from "@/components/PasswordDeleteGuard";
 
 const FIELDS: { key: keyof School; label: string; ph?: string }[] = [
   { key: "name", label: "ชื่อโรงเรียน", ph: "เช่น วัดทุ่งจาน" },
-  { key: "academic_year", label: "ปีการศึกษา", ph: "เช่น 2568" },
   { key: "tambon", label: "ตำบล" },
   { key: "amphoe", label: "อำเภอ" },
   { key: "province", label: "จังหวัด" },
@@ -61,7 +60,6 @@ export default function SettingsClient({
       .from("school")
       .update({
         name: form.name,
-        academic_year: form.academic_year,
         tambon: form.tambon,
         amphoe: form.amphoe,
         province: form.province,
@@ -93,7 +91,7 @@ export default function SettingsClient({
     setUploading(true);
     setMsg(null);
     const ext = file.name.split(".").pop();
-    const path = `logo/school-${form.id}-${Date.now()}.${ext}`;
+    const path = `${form.id}/logo/school-${form.id}-${Date.now()}.${ext}`;
     const { error: upErr } = await supabase.storage.from("assets").upload(path, file, { upsert: true });
     if (upErr) {
       setUploading(false);
