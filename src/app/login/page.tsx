@@ -80,6 +80,12 @@ export default function LoginPage() {
           </button>
         </form>
 
+        <div className="mt-3 text-center text-sm">
+          <Link href="/forgot-password" className="font-medium text-indigo-700 hover:underline">
+            ลืมรหัสผ่าน
+          </Link>
+        </div>
+
         <div className="mt-4 text-center text-sm">
           <Link href="/signup" className="font-medium text-indigo-700 hover:underline">สมัครใช้งานสำหรับโรงเรียน</Link>
         </div>
