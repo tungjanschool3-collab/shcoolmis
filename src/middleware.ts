@@ -32,7 +32,7 @@ export async function middleware(request: NextRequest) {
   }
 
   const path = request.nextUrl.pathname;
-  const isAuthRoute = path === "/login" || path === "/signup";
+  const isAuthRoute = path === "/login" || path === "/signup" || path === "/forgot-password";
   const isPublic = isAuthRoute || path.startsWith("/auth/") || path.startsWith("/_next") || path === "/favicon.ico";
 
   if (!user && !isPublic) {
