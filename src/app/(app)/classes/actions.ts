@@ -16,14 +16,43 @@ import { getActiveSchool } from "@/lib/school-context";
 
 export type ActionResult = { ok: boolean; error?: string; id?: string };
 
+export async function createAcademicYear(formData: FormData): Promise<ActionResult> {
+  const profile = await requireProfile();
+  if (!["platform_owner", "school_admin", "admin"].includes(profile.role)) return { ok: false, error: "ต้องเป็นผู้ดูแลโรงเรียน" };
+  const year = String(formData.get("year") || "").trim();
+  if (!/^\d{4}$/.test(year)) return { ok: false, error: "ปีการศึกษาต้องเป็นตัวเลข 4 หลัก" };
+  const supabase = await createClient();
+  const school = await getActiveSchool(profile);
+  if (!school) return { ok: false, error: "ไม่พบโรงเรียน" };
+  const { data, error } = await supabase.from("academic_years").insert({ school_id: school.id, year, created_by: profile.id }).select("id").single();
+  if (error || !data) return { ok: false, error: error?.message || "สร้างปีการศึกษาไม่สำเร็จ" };
+  revalidatePath("/classes");
+  return { ok: true, id: data.id };
+}
+
+export async function deleteAcademicYear(yearId: string, confirmation: string): Promise<ActionResult> {
+  const profile = await requireProfile();
+  if (!["platform_owner", "school_admin", "admin"].includes(profile.role)) return { ok: false, error: "ต้องเป็นผู้ดูแลโรงเรียน" };
+  const supabase = await createClient();
+  const { data: year } = await supabase.from("academic_years").select("year").eq("id", yearId).single();
+  if (!year || confirmation !== year.year) return { ok: false, error: "ข้อความยืนยันปีการศึกษาไม่ถูกต้อง" };
+  const { error } = await supabase.rpc("delete_exported_academic_year", { target_year_id: yearId });
+  if (error) return { ok: false, error: error.message };
+  revalidatePath("/classes");
+  return { ok: true };
+}
+
 export async function createClassRoom(formData: FormData): Promise<ActionResult> {
   const profile = await requireProfile();
-  if (profile.role !== "admin") return { ok: false, error: "ต้องเป็นผู้ดูแลระบบ" };
+  if (!["platform_owner", "school_admin", "admin"].includes(profile.role)) return { ok: false, error: "ต้องเป็นผู้ดูแลระบบ" };
 
   const supabase = await createClient();
   const activeSchool = await getActiveSchool(profile);
   if (!activeSchool) return { ok: false, error: "กรุณาเลือกโรงเรียนก่อนสร้างห้องเรียน" };
-  const academic_year = String(formData.get("academic_year") || "").trim();
+  const academicYearId = String(formData.get("academic_year_id") || "").trim();
+  const { data: yearRow } = await supabase.from("academic_years").select("id,year,school_id").eq("id", academicYearId).eq("school_id", activeSchool.id).single();
+  if (!yearRow) return { ok: false, error: "ไม่พบปีการศึกษาของโรงเรียนนี้" };
+  const academic_year = yearRow.year;
   const grade_level = String(formData.get("grade_level") || "").trim();
   const room = String(formData.get("room") || "").trim();
   const homeroom_teacher_id = String(formData.get("homeroom_teacher_id") || "").trim() || null;
@@ -38,6 +67,7 @@ export async function createClassRoom(formData: FormData): Promise<ActionResult>
     .insert({
       school_id: activeSchool.id,
       academic_year,
+      academic_year_id: yearRow.id,
       grade_level,
       room,
       homeroom_teacher_id,
@@ -113,7 +143,7 @@ export async function createClassRoom(formData: FormData): Promise<ActionResult>
 
 export async function deleteClassRoom(classId: string): Promise<ActionResult> {
   const profile = await requireProfile();
-  if (profile.role !== "admin") return { ok: false, error: "ต้องเป็นผู้ดูแลระบบ" };
+  if (!["platform_owner", "school_admin", "admin"].includes(profile.role)) return { ok: false, error: "ต้องเป็นผู้ดูแลระบบ" };
   const supabase = await createClient();
   const { error } = await supabase.from("classes").delete().eq("id", classId);
   if (error) return { ok: false, error: error.message };

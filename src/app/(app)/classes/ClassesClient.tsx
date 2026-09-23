@@ -12,17 +12,21 @@ export default function ClassesClient({
   classes,
   counts,
   teachers,
+  academicYearId,
+  academicYear,
 }: {
   profile: Profile;
   classes: ClassRoom[];
   counts: Record<string, number>;
   teachers: Profile[];
+  academicYearId: string;
+  academicYear: string;
 }) {
   const router = useRouter();
   const [showForm, setShowForm] = useState(false);
   const [busy, setBusy] = useState(false);
   const [msg, setMsg] = useState<string | null>(null);
-  const isAdmin = profile.role === "admin";
+  const isAdmin = ["platform_owner", "school_admin", "admin"].includes(profile.role);
   const { requestDelete, deletePasswordDialog } = usePasswordDelete();
   const classesByAcademicYear = classes.reduce<Record<string, ClassRoom[]>>((groups, classroom) => {
     const year = classroom.academic_year?.trim() || "ไม่ระบุ";
@@ -61,7 +65,7 @@ export default function ClassesClient({
     <div className="space-y-5">
       {deletePasswordDialog}
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-slate-800">ห้องเรียน</h1>
+        <div><Link href="/classes" className="text-sm text-indigo-700 hover:underline">← ปีการศึกษา</Link><h1 className="mt-1 text-2xl font-bold text-slate-800">ห้องเรียน ปีการศึกษา {academicYear}</h1></div>
         {isAdmin && (
           <button
             onClick={() => setShowForm((v) => !v)}
@@ -79,10 +83,7 @@ export default function ClassesClient({
           onSubmit={handleCreate}
           className="bg-white rounded-xl shadow-sm border border-slate-100 p-5 grid sm:grid-cols-2 gap-4"
         >
-          <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">ปีการศึกษา</label>
-            <input name="academic_year" defaultValue="2568" className="w-full rounded-lg border border-slate-300 px-3 py-2" />
-          </div>
+          <input type="hidden" name="academic_year_id" value={academicYearId} />
           <div>
             <label className="block text-sm font-medium text-slate-700 mb-1">ระดับชั้น *</label>
             <input

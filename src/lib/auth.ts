@@ -20,6 +20,18 @@ export async function requireProfile(): Promise<Profile> {
 
 export async function requireAdmin(): Promise<Profile> {
   const profile = await requireProfile();
-  if (profile.role !== "admin") redirect("/dashboard");
+  if (!["platform_owner", "school_admin", "admin"].includes(profile.role)) redirect("/dashboard");
+  return profile;
+}
+
+export async function requirePlatformOwner(): Promise<Profile> {
+  const profile = await requireProfile();
+  if (profile.role !== "platform_owner") redirect("/dashboard");
+  return profile;
+}
+
+export async function requireSchoolAdmin(): Promise<Profile> {
+  const profile = await requireProfile();
+  if (!["platform_owner", "school_admin", "admin"].includes(profile.role)) redirect("/dashboard");
   return profile;
 }

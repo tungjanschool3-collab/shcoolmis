@@ -2,11 +2,12 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { createClient, usernameToEmail } from "@/lib/supabase/client";
 
 export default function LoginPage() {
   const router = useRouter();
-  const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -17,7 +18,7 @@ export default function LoginPage() {
     setLoading(true);
     const supabase = createClient();
     const { error } = await supabase.auth.signInWithPassword({
-      email: usernameToEmail(username),
+      email: usernameToEmail(email),
       password,
     });
     setLoading(false);
@@ -42,15 +43,15 @@ export default function LoginPage() {
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">ชื่อผู้ใช้</label>
+            <label className="block text-sm font-medium text-slate-700 mb-1">อีเมล</label>
             <input
               type="text"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              autoComplete="username"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              autoComplete="email"
               required
               className="w-full rounded-lg border border-slate-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-              placeholder="เช่น admin"
+              placeholder="name@school.ac.th (บัญชีเดิมใช้ชื่อผู้ใช้ได้)"
             />
           </div>
           <div>
@@ -78,6 +79,10 @@ export default function LoginPage() {
             {loading ? "กำลังเข้าสู่ระบบ..." : "เข้าสู่ระบบ"}
           </button>
         </form>
+
+        <div className="mt-4 text-center text-sm">
+          <Link href="/signup" className="font-medium text-indigo-700 hover:underline">สมัครใช้งานสำหรับโรงเรียน</Link>
+        </div>
 
         <div className="mt-6 pt-4 border-t border-slate-100 text-center text-xs text-slate-400">
           ผู้พัฒนาระบบ นางโสภิตรา จิตชู

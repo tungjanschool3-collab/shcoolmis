@@ -18,7 +18,7 @@ export default async function AttendancePage({ params }: { params: Promise<{ id:
     <AttendanceClient
       classId={id}
       schoolId={cls?.school_id ?? 0}
-      isAdmin={profile.role === "admin"}
+      isAdmin={["platform_owner", "school_admin", "admin"].includes(profile.role)}
       academicYear={cls?.academic_year || ""}
       students={(students as Student[]) ?? []}
       initialDays={(days as SchoolDay[]) ?? []}
