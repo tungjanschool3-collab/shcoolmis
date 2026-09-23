@@ -23,7 +23,7 @@ export default function Sidebar({ profile, activeSchool }: { profile: Profile; a
     if (n.href === "/schools") return profile.role === "platform_owner";
     return !n.adminOnly || isAdmin;
   });
-  const classMatch = pathname.match(/^\/classes\/([^/]+)/);
+  const classMatch = pathname.match(/^\/classes\/(?!year(?:\/|$))([^/]+)/);
   const reportsHref = classMatch ? `/classes/${classMatch[1]}/reports` : null;
   if (reportsHref) {
     const classesIndex = items.findIndex((item) => item.href === "/classes");
