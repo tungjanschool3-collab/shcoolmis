@@ -1204,3 +1204,24 @@ main h3 {
   font-size: 14px !important;
   line-height: 1.25 !important;
 }
+
+
+/* Individual student report typography scale */
+.evaluation-sheet .document-school-name { font-size: 18px !important; font-weight: 700 !important; }
+.evaluation-sheet .document-report-title { font-size: 18px !important; font-weight: 700 !important; }
+.evaluation-sheet .document-class-line { font-size: 15px !important; }
+.evaluation-sheet .student-heading-line { font-size: 16px !important; font-weight: 400; }
+.evaluation-sheet .report-page-number { font-size: 12px !important; }
+.evaluation-sheet:not(.summary-sheet) .evaluation-report-table thead th,
+.summary-sheet .summary-report-table th { font-size: 15px !important; font-weight: 700 !important; }
+.evaluation-sheet:not(.summary-sheet) .evaluation-report-table tbody td { font-size: 15px !important; }
+.evaluation-sheet:not(.summary-sheet) .evaluation-report-table tbody td:nth-child(5) { font-size: 14px !important; line-height: 1.2; }
+.summary-sheet .summary-report-table td { font-size: 15px !important; }
+.teacher-comment { font-size: 15px; }
+.teacher-comment-title { font-size: 15px !important; }
+.evaluation-sheet .report-signatures,
+.summary-sheet .summary-signature { font-size: 13px !important; }
+
+.evaluation-sheet .teacher-comment { font-size: 15px !important; }
+.evaluation-sheet .report-signatures *,
+.summary-sheet .summary-signature * { font-size: 13px !important; }
