@@ -1225,3 +1225,29 @@ main h3 {
 .evaluation-sheet .teacher-comment { font-size: 15px !important; }
 .evaluation-sheet .report-signatures *,
 .summary-sheet .summary-signature * { font-size: 13px !important; }
+
+
+/* Annual detailed personal report typography requested by the school. */
+.evaluation-sheet .document-school-name,
+.evaluation-sheet .document-report-title {
+  font-size: 20px !important;
+  font-weight: 700 !important;
+}
+.evaluation-sheet .document-class-line,
+.evaluation-sheet .student-heading-line {
+  font-size: 16px !important;
+}
+.evaluation-sheet:not(.summary-sheet) .evaluation-report-table thead th,
+.summary-sheet .summary-report-table th {
+  font-size: 14px !important;
+  font-weight: 700 !important;
+}
+.evaluation-sheet:not(.summary-sheet) .evaluation-report-table tbody td:nth-child(5) {
+  font-size: 13px !important;
+}
+.evaluation-sheet .report-signatures,
+.evaluation-sheet .report-signatures *,
+.summary-sheet .summary-signature,
+.summary-sheet .summary-signature * {
+  font-size: 14px !important;
+}
