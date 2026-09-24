@@ -1251,3 +1251,32 @@ main h3 {
 .summary-sheet .summary-signature * {
   font-size: 14px !important;
 }
+/* Final typography for the two-page individual student report. */
+.evaluation-sheet .document-school-name,
+.evaluation-sheet .document-report-title {
+  font-size: 18px !important;
+  font-weight: 700 !important;
+}
+.evaluation-sheet .document-class-line,
+.evaluation-sheet .student-heading-line {
+  font-size: 16px !important;
+}
+.evaluation-sheet:not(.summary-sheet) .evaluation-report-table th,
+.evaluation-sheet:not(.summary-sheet) .evaluation-report-table td,
+.evaluation-sheet.summary-sheet .summary-report-table th,
+.evaluation-sheet.summary-sheet .summary-report-table td,
+.evaluation-sheet:not(.summary-sheet) .evaluation-report-table tbody td:nth-child(5) {
+  font-size: 14px !important;
+}
+.evaluation-sheet:not(.summary-sheet) .evaluation-report-table th,
+.evaluation-sheet.summary-sheet .summary-report-table th {
+  font-weight: 700 !important;
+}
+.evaluation-sheet .report-signatures,
+.evaluation-sheet .report-signatures *,
+.evaluation-sheet .teacher-comment,
+.evaluation-sheet .teacher-comment-title,
+.evaluation-sheet .summary-signature,
+.evaluation-sheet .summary-signature * {
+  font-size: 15px !important;
+}
