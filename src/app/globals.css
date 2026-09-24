@@ -1283,3 +1283,9 @@ main h3 {
 .evaluation-sheet:not(.summary-sheet) .evaluation-report-table tbody td {
   font-size: 14px !important;
 }
+
+
+/* Increase line spacing in the behavior-description column. */
+.evaluation-sheet:not(.summary-sheet) .evaluation-report-table tbody td:nth-child(5) {
+  line-height: 1.5;
+}
