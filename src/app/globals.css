@@ -1280,3 +1280,6 @@ main h3 {
 .evaluation-sheet .summary-signature * {
   font-size: 15px !important;
 }
+.evaluation-sheet:not(.summary-sheet) .evaluation-report-table tbody td {
+  font-size: 14px !important;
+}
