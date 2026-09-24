@@ -54,11 +54,16 @@ export default function PersonReportSheet({
   const title = "แบบรายงานผลการพัฒนาคุณภาพผู้เรียน" + (isYear ? "" : ` (ภาคเรียนที่ ${term})`);
   const rubricByOrder = new Map(competencyLevels.map((item) => [item.order_no, item]));
   const thai = report.rows.find((row) => row.subject.order_no === 1);
+  const english = report.rows.find((row) => row.subject.order_no === 2);
   const math = report.rows.find((row) => row.subject.order_no === 3);
   const applied = report.rows.filter((row) => row.subject.category === "ประยุกต์");
   const termKey = term === "1" ? "sem1" : term === "2" ? "sem2" : "year";
-  const readingLevel = abilityForGrade(selectedGrade(thai, term));
-  const writingLevel = abilityForGrade(selectedGrade(thai, term));
+  const languageGrade = averageGrade([
+    selectedGrade(thai, term),
+    selectedGrade(english, term),
+  ]);
+  const readingLevel = abilityForGrade(languageGrade);
+  const writingLevel = abilityForGrade(languageGrade);
   const numeracyLevel = abilityForGrade(selectedGrade(math, term));
   const appliedLevel = abilityForGrade(
     averageGrade(applied.map((row) => selectedGrade(row, term)))

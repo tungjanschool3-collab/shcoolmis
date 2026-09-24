@@ -25,7 +25,7 @@ export default async function SubjectScoresPage({
     <>
       <PrintToolbar title="ตารางคะแนนรายวิชา" />
       <div className="py-4 print:py-0">
-                        <col style={{ width: "30%" }} />
+        {subjects.flatMap((subject) => Array.from({ length: Math.max(1, Math.ceil(students.length / 30)) }, (_, pageIndex) => (
           <div key={`${subject.id}-${pageIndex}`} className="print-page score-sheet">
             <header className="plain-form-header">
               <div className="plain-form-title">รายวิชา{subject.category === "เพิ่มเติม" ? "เพิ่มเติม" : "พื้นฐาน"} : {subject.name} คะแนนเฉลี่ย</div>

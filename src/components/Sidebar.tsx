@@ -18,8 +18,12 @@ export default function Sidebar({ profile, activeSchool }: { profile: Profile; a
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
 
-  const items = nav.filter((n) => !n.adminOnly || profile.role === "admin");
-  const classMatch = pathname.match(/^\/classes\/([^/]+)/);
+  const isAdmin = ["platform_owner", "school_admin", "admin"].includes(profile.role);
+  const items = nav.filter((n) => {
+    if (n.href === "/schools") return profile.role === "platform_owner";
+    return !n.adminOnly || isAdmin;
+  });
+  const classMatch = pathname.match(/^\/classes\/(?!year(?:\/|$))([^/]+)/);
   const reportsHref = classMatch ? `/classes/${classMatch[1]}/reports` : null;
   if (reportsHref) {
     const classesIndex = items.findIndex((item) => item.href === "/classes");
@@ -84,7 +88,7 @@ export default function Sidebar({ profile, activeSchool }: { profile: Profile; a
         <div className="px-4 py-4 border-t border-slate-700">
           <div className="text-sm font-medium">{profile.full_name || profile.username}</div>
           <div className="text-xs text-slate-400 mb-3">
-            {profile.role === "admin" ? "ผู้ดูแลระบบ" : "ครู"}
+            {profile.role === "platform_owner" ? "ผู้ดูแลระบบกลาง" : isAdmin ? "ผู้ดูแลโรงเรียน" : "ครู"}
           </div>
           <form action={signOut}>
             <button className="w-full text-left text-sm text-rose-300 hover:text-rose-200">

@@ -10,7 +10,20 @@ export async function getActiveSchool(profile: Profile): Promise<School | null> 
   const supabase = await createClient();
   const cookieStore = await cookies();
   const requestedId = Number(cookieStore.get(ACTIVE_SCHOOL_COOKIE)?.value || 0);
-  const schoolId = profile.role === "admin" ? requestedId : Number(profile.school_id || 0);
+  const isPlatformOwner = profile.role === "platform_owner" || profile.role === "admin";
+  let schoolId = isPlatformOwner ? requestedId : Number(profile.school_id || 0);
+
+  if (!isPlatformOwner) {
+    const { data: membership } = await supabase
+      .from("school_memberships")
+      .select("school_id")
+      .eq("user_id", profile.id)
+      .eq("status", "active")
+      .order("created_at")
+      .limit(1)
+      .maybeSingle();
+    schoolId = Number(membership?.school_id || schoolId || 0);
+  }
 
   if (schoolId > 0) {
     const { data } = await supabase.from("school").select("*").eq("id", schoolId).maybeSingle();

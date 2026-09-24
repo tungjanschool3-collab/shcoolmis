@@ -920,7 +920,7 @@ main h3 {
 /* Use Sarabun consistently for all PDF text, including Thai and Arabic digits. */
 .print-page { font-family: var(--font-print-thai); }
 
-/* Roster page: add a little breathing room below the heading and keep all text at 16px. */
+/* Roster page: add a little breathing room below the heading. */
 .roster-sheet .roster-form-header {
   min-height: 12mm;
   margin-bottom: 4mm;
@@ -935,6 +935,10 @@ main h3 {
 .roster-sheet .roster-table td {
   font-size: 16px !important;
   line-height: 1.25 !important;
+}
+.roster-sheet .roster-table th:nth-child(4),
+.roster-sheet .roster-table tbody td:nth-child(4) {
+  font-size: 14px !important;
 }
 .roster-sheet .plain-form-title,
 .roster-sheet .plain-form-context {
@@ -1166,6 +1170,26 @@ main h3 {
   font-size: 16px !important;
   font-weight: 400 !important;
   line-height: 1.35 !important;
+}
+
+/* Detailed personal report pages 1-2: use one consistent 12px print size. */
+.evaluation-sheet,
+.evaluation-sheet .document-school-name,
+.evaluation-sheet .document-report-title,
+.evaluation-sheet .document-class-line,
+.evaluation-sheet .student-heading-line,
+.evaluation-sheet .report-page-number,
+.evaluation-sheet .evaluation-report-table th,
+.evaluation-sheet .evaluation-report-table td,
+.evaluation-sheet .summary-report-table th,
+.evaluation-sheet .summary-report-table td,
+.evaluation-sheet .report-signatures,
+.evaluation-sheet .report-signatures *,
+.evaluation-sheet .teacher-comment,
+.evaluation-sheet .teacher-comment-title,
+.evaluation-sheet .summary-signature,
+.evaluation-sheet .summary-signature * {
+  font-size: 12px !important;
 }
 
 /* Subject score report heading and student-name column. */

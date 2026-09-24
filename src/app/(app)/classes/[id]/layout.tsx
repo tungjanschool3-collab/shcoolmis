@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { requireProfile } from "@/lib/auth";
 import type { ClassRoom } from "@/lib/types";
 import ClassTabs from "@/components/ClassTabs";
+import TableArrowNavigation from "@/components/TableArrowNavigation";
 
 export default async function ClassLayout({
   children,
@@ -31,7 +32,7 @@ export default async function ClassLayout({
         </h1>
       </div>
       <ClassTabs classId={id} />
-      <div>{children}</div>
+      <TableArrowNavigation>{children}</TableArrowNavigation>
     </div>
   );
 }

@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useRef, useState } from "react";
+import type { KeyboardEvent } from "react";
 import { createClient } from "@/lib/supabase/client";
 import type { Student, Subject, SubjectScore, GradeCriterion } from "@/lib/types";
 import { fullName } from "@/lib/types";
@@ -191,7 +192,7 @@ export default function GradesClient({
             </tr>
           </thead>
           <tbody>
-            {students.map((st) => {
+            {students.map((st, rowIndex) => {
               const sc = getScore(st.id);
               const res = computeSubjectResult(
                 {
@@ -207,12 +208,12 @@ export default function GradesClient({
                 <tr key={st.id} className={`border-t border-slate-100 ${sc._dirty ? "bg-amber-50" : ""}`}>
                   <td className="px-1 py-1 text-center">{st.no}</td>
                   <td className="px-2 py-1 whitespace-nowrap">{fullName(st)}</td>
-                  <Num v={sc.sem1_mid} onC={(v) => setField(st.id, "sem1_mid", v)} border />
-                  <Num v={sc.sem1_final} onC={(v) => setField(st.id, "sem1_final", v)} />
+                  <Num v={sc.sem1_mid} onC={(v) => setField(st.id, "sem1_mid", v)} row={rowIndex} col={0} border />
+                  <Num v={sc.sem1_final} onC={(v) => setField(st.id, "sem1_final", v)} row={rowIndex} col={1} />
                   <td className="px-1 py-1 text-center text-slate-500">{res.sem1Total ?? ""}</td>
                   <td className="px-1 py-1 text-center font-medium">{gradeText(res.sem1Grade)}</td>
-                  <Num v={sc.sem2_mid} onC={(v) => setField(st.id, "sem2_mid", v)} border />
-                  <Num v={sc.sem2_final} onC={(v) => setField(st.id, "sem2_final", v)} />
+                  <Num v={sc.sem2_mid} onC={(v) => setField(st.id, "sem2_mid", v)} row={rowIndex} col={2} border />
+                  <Num v={sc.sem2_final} onC={(v) => setField(st.id, "sem2_final", v)} row={rowIndex} col={3} />
                   <td className="px-1 py-1 text-center text-slate-500">{res.sem2Total ?? ""}</td>
                   <td className="px-1 py-1 text-center font-medium">{gradeText(res.sem2Grade)}</td>
                   <td className="px-1 py-1 text-center text-slate-500 border-l">
@@ -226,6 +227,9 @@ export default function GradesClient({
                       placeholder="-"
                       value={sc.override_grade ?? ""}
                       onChange={(e) => setField(st.id, "override_grade", e.target.value)}
+                      onKeyDown={moveScoreCell}
+                      data-score-row={rowIndex}
+                      data-score-col={4}
                       className="w-14 rounded border border-amber-300 px-1 py-1 text-center"
                       title="กรอกเพื่อแก้เกรดรายปีด้วยตนเอง (เว้นว่าง = ใช้ค่าที่ระบบคำนวณ)"
                     />
@@ -246,10 +250,14 @@ export default function GradesClient({
 function Num({
   v,
   onC,
+  row,
+  col,
   border,
 }: {
   v: number | null | undefined;
   onC: (val: string) => void;
+  row: number;
+  col: number;
   border?: boolean;
 }) {
   return (
@@ -258,8 +266,33 @@ function Num({
         type="number"
         value={v ?? ""}
         onChange={(e) => onC(e.target.value)}
+        onKeyDown={moveScoreCell}
+        data-score-row={row}
+        data-score-col={col}
         className="w-14 rounded border border-slate-200 px-1 py-1 text-center"
       />
     </td>
   );
+}
+
+function moveScoreCell(event: KeyboardEvent<HTMLInputElement>) {
+  const movement: Record<string, [number, number]> = {
+    ArrowUp: [-1, 0],
+    ArrowDown: [1, 0],
+    ArrowLeft: [0, -1],
+    ArrowRight: [0, 1],
+  };
+  const delta = movement[event.key];
+  if (!delta) return;
+
+  const row = Number(event.currentTarget.dataset.scoreRow);
+  const col = Number(event.currentTarget.dataset.scoreCol);
+  const next = document.querySelector<HTMLInputElement>(
+    `[data-score-row="${row + delta[0]}"][data-score-col="${col + delta[1]}"]`
+  );
+  if (!next) return;
+
+  event.preventDefault();
+  next.focus();
+  next.select();
 }

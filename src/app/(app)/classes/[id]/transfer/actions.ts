@@ -20,7 +20,7 @@ export async function seedTransferDefaults(classId: string): Promise<ActionResul
   if ((count ?? 0) > 0) return { ok: false, error: "มีวิชาเทียบโอนอยู่แล้ว" };
 
   // สิทธิ์: admin หรือ เจ้าของห้อง (RLS จะบังคับอีกชั้น)
-  if (profile.role !== "admin") {
+  if (!["platform_owner", "school_admin", "admin"].includes(profile.role)) {
     const { data: cls } = await supabase.from("classes").select("homeroom_teacher_id").eq("id", classId).single();
     if (!cls || cls.homeroom_teacher_id !== profile.id) return { ok: false, error: "ไม่มีสิทธิ์" };
   }
