@@ -1512,3 +1512,15 @@ main h3 {
   font-size: 14px !important;
   line-height: 17.5px !important;
 }
+
+/* Keep the personal score summary aligned with the transfer report. */
+.print-page.score-summary-sheet .transfer-report-table tfoot td {
+  height: 8mm !important;
+}
+
+/* Subject names use the same compact type size in both personal report variants. */
+.print-page.score-summary-sheet .transfer-report-table tbody td:nth-child(2),
+.print-page.transfer-single-page .transfer-report-table tbody td.transfer-subject-name {
+  font-size: 14px !important;
+  line-height: 1.2 !important;
+}
