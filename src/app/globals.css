@@ -1321,3 +1321,8 @@ main h3 {
 .evaluation-sheet .summary-signature * {
   font-size: 14px !important;
 }
+
+.evaluation-sheet:not(.summary-sheet) .report-signatures,
+.evaluation-sheet:not(.summary-sheet) .report-signatures * {
+  font-size: 14px !important;
+}
