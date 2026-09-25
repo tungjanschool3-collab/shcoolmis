@@ -1326,3 +1326,17 @@ main h3 {
 .evaluation-sheet:not(.summary-sheet) .report-signatures * {
   font-size: 14px !important;
 }
+
+/* Keep page 1 inside its fixed A4 box. The more specific selector is needed
+   because the shared print rules otherwise leave the subject column at 16px. */
+.print-page.evaluation-sheet:not(.summary-sheet) .evaluation-report-table tbody td:nth-child(2) {
+  font-size: 14px !important;
+  line-height: 1.2 !important;
+  overflow-wrap: anywhere;
+}
+
+.print-page.evaluation-sheet:not(.summary-sheet) .evaluation-report-table tbody td:nth-child(5) {
+  font-size: 14px !important;
+  line-height: 1.35 !important;
+  overflow-wrap: anywhere;
+}
