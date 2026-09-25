@@ -1479,3 +1479,36 @@ main h3 {
 .print-page.evaluation-sheet:not(.summary-sheet) .evaluation-report-table tbody td:nth-child(2) {
   font-size: 14px !important;
 }
+
+/* Requested final line spacing for the two-page personal report. */
+.print-page.evaluation-sheet .document-school-name,
+.print-page.evaluation-sheet .document-report-title {
+  font-size: 18px !important;
+  line-height: 20px !important;
+}
+
+.print-page.evaluation-sheet .document-class-line,
+.print-page.evaluation-sheet .student-heading-line {
+  font-size: 16px !important;
+  line-height: 20px !important;
+}
+
+.print-page.evaluation-sheet:not(.summary-sheet) .evaluation-report-table thead th,
+.print-page.evaluation-sheet.summary-sheet .summary-report-table thead th {
+  font-size: 14px !important;
+  line-height: 16.8px !important;
+}
+
+.print-page.evaluation-sheet:not(.summary-sheet) .evaluation-report-table tbody td:nth-child(2),
+.print-page.evaluation-sheet:not(.summary-sheet) .evaluation-report-table tbody td:nth-child(5) {
+  font-size: 14px !important;
+  line-height: 17.5px !important;
+}
+
+.print-page.evaluation-sheet .report-signatures,
+.print-page.evaluation-sheet .report-signatures *,
+.print-page.evaluation-sheet .summary-signature,
+.print-page.evaluation-sheet .summary-signature * {
+  font-size: 14px !important;
+  line-height: 17.5px !important;
+}
