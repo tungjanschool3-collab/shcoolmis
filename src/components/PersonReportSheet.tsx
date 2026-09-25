@@ -137,7 +137,7 @@ export default function PersonReportSheet({
         <ReportHeader
           school={school}
           cls={cls}
-          title="แบบรายงานผลการเรียนระดับชั้นประถมศึกษาตอนต้น"
+          title={title}
         />
 
         <div className="student-heading-line mt-2 mb-2 px-1">

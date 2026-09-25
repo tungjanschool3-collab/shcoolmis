@@ -1340,3 +1340,142 @@ main h3 {
   line-height: 1.35 !important;
   overflow-wrap: anywhere;
 }
+
+/* Final personal-report sizing: one report page per physical A4 page. */
+.print-toolbar,
+.print-toolbar button,
+.print-toolbar span {
+  font-size: 15px !important;
+}
+
+.print-page.evaluation-sheet {
+  width: 210mm;
+  height: 297mm;
+  min-height: 297mm;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+.print-page.evaluation-sheet .document-school-name,
+.print-page.evaluation-sheet .document-report-title,
+.print-page.evaluation-sheet .document-class-line,
+.print-page.evaluation-sheet .student-heading-line {
+  font-size: 15px !important;
+  line-height: 1.2 !important;
+}
+
+.print-page.evaluation-sheet:not(.summary-sheet) .evaluation-report-table thead th,
+.print-page.evaluation-sheet:not(.summary-sheet) .evaluation-report-table tbody td,
+.print-page.evaluation-sheet.summary-sheet .summary-report-table thead th,
+.print-page.evaluation-sheet.summary-sheet .summary-report-table tbody td {
+  font-size: 14px !important;
+}
+
+.print-page.evaluation-sheet:not(.summary-sheet) .evaluation-report-table thead th,
+.print-page.evaluation-sheet.summary-sheet .summary-report-table thead th {
+  font-weight: 700 !important;
+}
+
+.print-page.evaluation-sheet:not(.summary-sheet) .evaluation-report-table thead th {
+  line-height: 1.05 !important;
+  padding: .65mm .55mm !important;
+}
+
+.print-page.evaluation-sheet:not(.summary-sheet) .evaluation-report-table tbody td {
+  line-height: 1.2 !important;
+  padding: .45mm .65mm !important;
+}
+
+.print-page.evaluation-sheet:not(.summary-sheet) .evaluation-report-table tbody td:nth-child(5) {
+  font-size: 14px !important;
+  line-height: 1.25 !important;
+}
+
+.print-page.evaluation-sheet .teacher-comment,
+.print-page.evaluation-sheet .teacher-comment-title,
+.print-page.evaluation-sheet .report-signatures,
+.print-page.evaluation-sheet .report-signatures *,
+.print-page.evaluation-sheet .summary-signature,
+.print-page.evaluation-sheet .summary-signature * {
+  font-size: 15px !important;
+}
+
+.print-page.evaluation-sheet .report-page-number {
+  font-size: 12px !important;
+  line-height: 1.08 !important;
+}
+
+@media print {
+  .print-page.evaluation-sheet {
+    break-inside: avoid;
+    break-after: page;
+  }
+
+  .print-page.evaluation-sheet:last-child {
+    break-after: auto;
+  }
+}
+
+/* Personal-report letterhead: school seal on the left, centered text, page number on the right. */
+.print-page.evaluation-sheet .document-letterhead {
+  display: grid;
+  grid-template-columns: 32mm minmax(0, 1fr) 32mm;
+  grid-template-rows: repeat(3, auto);
+  align-items: center;
+  min-height: 31mm;
+  padding: 0 5mm;
+  line-height: 1.2 !important;
+}
+
+.print-page.evaluation-sheet .document-letterhead .document-letterhead-logo {
+  grid-column: 1;
+  grid-row: 1 / 4;
+  align-self: center;
+  justify-self: center;
+  width: 28mm;
+  height: 28mm;
+  margin: 0;
+  object-fit: contain;
+}
+
+.print-page.evaluation-sheet .document-school-name,
+.print-page.evaluation-sheet .document-report-title,
+.print-page.evaluation-sheet .document-class-line {
+  grid-column: 2;
+  margin: 0;
+  text-align: center;
+}
+
+.print-page.evaluation-sheet .document-school-name,
+.print-page.evaluation-sheet .document-report-title {
+  font-size: 18px !important;
+  font-weight: 700 !important;
+  line-height: 1.25 !important;
+}
+
+.print-page.evaluation-sheet .document-class-line,
+.print-page.evaluation-sheet .student-heading-line {
+  font-size: 16px !important;
+  font-weight: 400 !important;
+  line-height: 1.25 !important;
+}
+
+.print-page.evaluation-sheet .student-heading-line {
+  justify-content: center;
+  gap: 4mm;
+  margin-top: 0 !important;
+  margin-bottom: 1.5mm !important;
+}
+
+.print-page.evaluation-sheet .report-page-number {
+  top: 6mm;
+  right: 13mm;
+  min-width: 0;
+  border: 0;
+  padding: 0;
+  background: transparent;
+}
+
+.print-page.evaluation-sheet:not(.summary-sheet) .evaluation-report-table tbody td:nth-child(2) {
+  font-size: 14px !important;
+}
