@@ -16,6 +16,7 @@ export default async function AcademicYearClassesPage({ params }: { params: Prom
   if (!year) notFound();
 
   const { data: classes } = await supabase.from("classes").select("*").eq("school_id", school.id).eq("academic_year_id", year.id).order("grade_level").order("room");
+  const { data: templateClasses } = await supabase.from("classes").select("*").eq("school_id", school.id).neq("academic_year_id", year.id).order("academic_year", { ascending: false }).order("grade_level").order("room");
   const list = (classes as ClassRoom[]) ?? [];
   const counts: Record<string, number> = {};
   if (list.length) {
@@ -33,5 +34,5 @@ export default async function AcademicYearClassesPage({ params }: { params: Prom
     }
   }
 
-  return <ClassesClient profile={profile} classes={list} counts={counts} teachers={teachers} academicYearId={year.id} academicYear={year.year} />;
+  return <ClassesClient profile={profile} classes={list} counts={counts} teachers={teachers} templateClasses={(templateClasses as ClassRoom[]) ?? []} academicYearId={year.id} academicYear={year.year} />;
 }

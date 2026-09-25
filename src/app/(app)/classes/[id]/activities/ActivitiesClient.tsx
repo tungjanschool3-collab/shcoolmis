@@ -7,6 +7,7 @@ import { fullName } from "@/lib/types";
 import { usePasswordDelete } from "@/components/PasswordDeleteGuard";
 import { decodeCsv, downloadCsvTemplate } from "@/lib/curriculum-csv";
 import { parseCsv } from "@/lib/student-csv";
+import { useUnsavedChangesWarning } from "@/lib/use-unsaved-changes-warning";
 
 type Cell = Partial<ActivityResult> & { _dirty?: boolean };
 type ActivityRow = Partial<Activity> & { _key: string; _dirty?: boolean; _new?: boolean };
@@ -49,6 +50,41 @@ export default function ActivitiesClient({
       row[aid] = { ...(row[aid] ?? {}), [sem]: value, _dirty: true, student_id: sid, activity_id: aid };
       return { ...prev, [sid]: row };
     });
+  }
+
+  function setAllPassed(sem: "sem1_result" | "sem2_result", onlyEmpty: boolean) {
+    const savedActivities = activityRows.filter((activity) => !activity._new);
+    if (!students.length || !savedActivities.length) {
+      setMsg("ต้องมีนักเรียนและกิจกรรมที่บันทึกแล้วก่อนเลือกผ่านทั้งหมด");
+      return;
+    }
+    const termLabel = sem === "sem1_result" ? "ภาคเรียนที่ 1" : "ภาคเรียนที่ 2";
+    const modeLabel = onlyEmpty ? "เฉพาะช่องว่าง" : "ทุกช่อง";
+    if (!window.confirm(`กำหนดผลเป็น “ผ่าน” ${modeLabel} ของ${termLabel} สำหรับนักเรียน ${students.length} คนหรือไม่?`)) return;
+
+    let changed = 0;
+    setMap((current) => {
+      const next = { ...current };
+      for (const student of students) {
+        const studentRow = { ...(next[student.id] ?? {}) };
+        for (const activity of savedActivities) {
+          const previous = studentRow[activity._key] ?? {};
+          const currentValue = previous[sem] ?? "";
+          if ((onlyEmpty && currentValue !== "") || currentValue === "ผ่าน") continue;
+          studentRow[activity._key] = {
+            ...previous,
+            [sem]: "ผ่าน",
+            _dirty: true,
+            student_id: student.id,
+            activity_id: activity._key,
+          };
+          changed += 1;
+        }
+        next[student.id] = studentRow;
+      }
+      return next;
+    });
+    setMsg(`กำหนด “ผ่าน” ${modeLabel} ของ${termLabel}แล้ว ${changed} ช่อง กรุณาตรวจสอบและกดบันทึก`);
   }
 
   function updateActivity(key: string, field: keyof Activity, value: string | number) {
@@ -168,6 +204,7 @@ export default function ActivitiesClient({
   const resultDirtyCount = Object.values(map).reduce((a, r) => a + Object.values(r).filter((c) => c._dirty).length, 0);
   const activityDirtyCount = activityRows.filter((activity) => activity._dirty).length;
   const dirtyCount = resultDirtyCount + activityDirtyCount;
+  useUnsavedChangesWarning(dirtyCount > 0);
 
   async function importCsv(file: File) {
     try {
@@ -242,6 +279,10 @@ export default function ActivitiesClient({
         <div className="text-sm text-slate-500">กิจกรรมพัฒนาผู้เรียน · ผลการประเมิน ผ่าน/ไม่ผ่าน</div>
         <div className="flex items-center gap-2">
           {msg && <span className="text-sm text-slate-500">{msg}</span>}
+          <button onClick={() => setAllPassed("sem1_result", true)} className="rounded-lg border border-emerald-300 bg-emerald-50 px-3 py-2 text-sm text-emerald-700">ผ่านช่องว่าง ภาค 1</button>
+          <button onClick={() => setAllPassed("sem2_result", true)} className="rounded-lg border border-emerald-300 bg-emerald-50 px-3 py-2 text-sm text-emerald-700">ผ่านช่องว่าง ภาค 2</button>
+          <button onClick={() => setAllPassed("sem1_result", false)} className="rounded-lg border border-green-400 px-3 py-2 text-sm text-green-700">ผ่านทั้งหมด ภาค 1</button>
+          <button onClick={() => setAllPassed("sem2_result", false)} className="rounded-lg border border-green-400 px-3 py-2 text-sm text-green-700">ผ่านทั้งหมด ภาค 2</button>
           <input ref={fileInputRef} type="file" accept=".csv,text/csv" className="hidden" onChange={(event) => { const file = event.target.files?.[0]; if (file) void importCsv(file); }} />
           <button onClick={downloadTemplate} className="rounded-lg border border-slate-300 px-3 py-2 text-sm">CSV ตัวอย่าง</button>
           <button onClick={() => fileInputRef.current?.click()} className="rounded-lg border border-indigo-300 bg-indigo-50 px-3 py-2 text-sm text-indigo-700">นำเข้า CSV</button>
