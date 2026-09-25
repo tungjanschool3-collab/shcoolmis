@@ -134,6 +134,49 @@ export type SubjectScore = {
   updated_at: string;
 };
 
+export type LearningOutcomeConfig = {
+  id: string;
+  subject_id: string;
+  term: 1 | 2;
+  target_max: number;
+  calculation_method: "proportional" | "weighted";
+  status: "draft" | "locked";
+  created_by: string | null;
+  created_at: string;
+  updated_at: string;
+};
+
+export type LearningOutcomeIndicator = {
+  id: string;
+  config_id: string;
+  order_no: number;
+  code: string;
+  title: string;
+  max_score: number;
+  weight_percent: number | null;
+  created_at: string;
+  updated_at: string;
+};
+
+export type LearningOutcomeScore = {
+  id: string;
+  student_id: string;
+  indicator_id: string;
+  score: number;
+  updated_by: string | null;
+  updated_at: string;
+};
+
+export type LearningOutcomeQualityLevel = {
+  id: string;
+  school_id: number;
+  code: "beginner" | "developing" | "proficient" | "expert";
+  label: string;
+  min_percent: number;
+  sort: number;
+  updated_at: string;
+};
+
 export type TransferSubject = {
   id: string;
   class_id: string;
