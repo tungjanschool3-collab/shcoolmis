@@ -12,7 +12,7 @@ export default function TableArrowNavigation({ children }: { children: ReactNode
       event.altKey ||
       event.ctrlKey ||
       event.metaKey ||
-      (event.key !== "ArrowUp" && event.key !== "ArrowDown")
+      !["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].includes(event.key)
     ) return;
 
     const current = event.target;
@@ -27,6 +27,21 @@ export default function TableArrowNavigation({ children }: { children: ReactNode
     const position = inputs.indexOf(current);
     if (position < 0) return;
 
+    if (event.key === "ArrowLeft" || event.key === "ArrowRight") {
+      const cells = Array.from(row.cells);
+      const direction = event.key === "ArrowRight" ? 1 : -1;
+      for (let index = cell.cellIndex + direction; index >= 0 && index < cells.length; index += direction) {
+        const next = Array.from(cells[index].querySelectorAll<HTMLElement>(editableSelector)).find((item) => !item.matches(":disabled") && item.getClientRects().length);
+        if (next) {
+          event.preventDefault();
+          next.focus();
+          if (next instanceof HTMLInputElement) next.select();
+          return;
+        }
+      }
+      return;
+    }
+
     let nextRow = event.key === "ArrowDown" ? row.nextElementSibling : row.previousElementSibling;
     while (nextRow instanceof HTMLTableRowElement) {
       const nextCell = nextRow.cells[cell.cellIndex];
@@ -34,7 +49,7 @@ export default function TableArrowNavigation({ children }: { children: ReactNode
       if (next && !next.matches(":disabled") && next.getClientRects().length) {
         event.preventDefault();
         next.focus();
-        if (next instanceof HTMLInputElement && next.type !== "number") next.select();
+        if (next instanceof HTMLInputElement) next.select();
         return;
       }
       nextRow = event.key === "ArrowDown" ? nextRow.nextElementSibling : nextRow.previousElementSibling;

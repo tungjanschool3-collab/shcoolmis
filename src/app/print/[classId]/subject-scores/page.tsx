@@ -2,6 +2,7 @@ import { loadClassBundle } from "@/lib/report-data";
 import { computeSubjectResult, gradeText } from "@/lib/grading";
 import { fullName } from "@/lib/types";
 import PrintToolbar from "@/components/PrintToolbar";
+import Link from "next/link";
 
 export const dynamic = "force-dynamic";
 
@@ -20,6 +21,23 @@ export default async function SubjectScoresPage({
 
   const scoreOf = (studentId: string, subjectId: string) =>
     subjectScores.find((s) => s.student_id === studentId && s.subject_id === subjectId);
+
+  const missingFields = subjects.reduce((count, subject) => count + students.reduce((studentCount, student) => {
+    const score = scoreOf(student.id, subject.id);
+    return studentCount + [score?.sem1_mid, score?.sem1_final, score?.sem2_mid, score?.sem2_final].filter((value) => value === null || value === undefined).length;
+  }, 0), 0);
+  const ready = students.length > 0 && subjects.length > 0 && missingFields === 0;
+
+  if (!ready) return <div className="mx-auto mt-12 max-w-2xl rounded-xl border border-amber-200 bg-amber-50 p-6 text-amber-900">
+    <h1 className="text-xl font-bold">ยังไม่สามารถพิมพ์ตารางคะแนนรายวิชาได้</h1>
+    <p className="mt-2">ต้องกรอกคะแนนระหว่างภาคและปลายภาคของนักเรียนทุกคนให้ครบทั้งสองภาคเรียนก่อน</p>
+    <ul className="mt-3 list-disc space-y-1 pl-5 text-sm">
+      {!students.length && <li>ยังไม่มีนักเรียนในห้อง</li>}
+      {!subjects.length && <li>ยังไม่มีรายวิชา</li>}
+      {!!missingFields && <li>คะแนนยังไม่ครบ {missingFields} ช่อง</li>}
+    </ul>
+    <Link href={`/classes/${classId}/grades`} className="mt-5 inline-block rounded-lg bg-amber-700 px-4 py-2 text-sm font-semibold text-white">กลับไปกรอกคะแนน</Link>
+  </div>;
 
   return (
     <>
