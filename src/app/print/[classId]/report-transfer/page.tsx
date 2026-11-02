@@ -14,7 +14,7 @@ export const dynamic = "force-dynamic";
 
 function num(v: number | null): string {
   if (v === null || Number.isNaN(v)) return "-";
-  return String(Math.round(v * 100) / 100);
+  return String(Math.round(v));
 }
 
 function termLabel(term: TransferTerm): string {
@@ -189,3 +189,4 @@ export default async function ReportTransferPage({
     </>
   );
 }
+
