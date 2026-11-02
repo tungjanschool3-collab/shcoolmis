@@ -13,6 +13,10 @@ import { seedTransferDefaults } from "./actions";
 import { usePasswordDelete } from "@/components/PasswordDeleteGuard";
 
 type Row = Partial<TransferSubject> & { _key: string; _new?: boolean };
+
+function formatRoundedAverage(value: number | null): string {
+  return value === null ? "-" : Math.round(value).toString();
+}
 const CATS = ["พื้นฐาน", "ประยุกต์", "เพิ่มเติม"];
 
 export default function TransferClient({
@@ -340,7 +344,7 @@ export default function TransferClient({
                 {rows.filter((row) => row.enabled ?? true).map((row) => {
                   const calculation = studentCalculation(row._key, calculatedStudentId);
                   const resultCell = (result: { average: number | null; grade: number | null }) =>
-                    result.average === null ? "-" : result.average.toFixed(2);
+                    formatRoundedAverage(result.average);
                   return (
                     <tr key={row._key} className="border-t border-slate-100 align-top">
                       <td className="px-3 py-2 font-medium text-slate-800">{row.order_no}. {row.name || "-"}</td>
@@ -429,7 +433,7 @@ export default function TransferClient({
                       + เลือก / เพิ่ม
                     </button>
                   </td>
-                  <td className="px-2 py-2 text-center font-semibold text-emerald-700">{showCalculated ? (calculated.average === null ? "-" : calculated.average.toFixed(2)) : "กดคำนวณ"}</td>
+                  <td className="px-2 py-2 text-center font-semibold text-emerald-700">{showCalculated ? formatRoundedAverage(calculated.average) : "กดคำนวณ"}</td>
                   <td className="px-2 py-2 text-center font-bold text-indigo-700">{showCalculated ? (gradeText(calculated.grade) || "-") : "-"}</td>
                   <td className="px-1 py-1 text-center"><button onClick={() => removeRow(r._key)} className="text-rose-500">✕</button></td>
                 </tr>
@@ -474,3 +478,4 @@ export default function TransferClient({
     </div>
   );
 }
+
