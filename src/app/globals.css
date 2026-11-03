@@ -1524,3 +1524,4 @@ main h3 {
   font-size: 14px !important;
   line-height: 1.2 !important;
 }
+\r\n\r\n/* ป.2-3 three-page report: use Thai word boundaries instead of forcing a\r\n   break at any character, so words remain intact inside table cells. */\r\n.print-page.evaluation-sheet.split-subject-pages .evaluation-report-table th,\r\n.print-page.evaluation-sheet.split-subject-pages .evaluation-report-table td {\r\n  white-space: normal !important;\r\n  overflow-wrap: normal !important;\r\n  word-break: normal !important;\r\n  line-break: auto;\r\n  hyphens: none;\r\n}\r\n
