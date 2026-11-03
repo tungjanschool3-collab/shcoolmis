@@ -72,18 +72,27 @@ export default function PersonReportSheet({
   const characteristicLevel = report.assessmentLevels.characteristic[termKey] || "-";
   const competencyLevel = report.assessmentLevels.competency[termKey] || "-";
 
-  return (
-    <>
-      <div className="print-page sheet evaluation-sheet">
-        <div className="report-page-number">หน้า 1</div>
-        <ReportHeader school={school} cls={cls} title={title} />
+  const gradeLevel = cls?.grade_level || "";
+  const splitSubjectPages = /(?:ป\.?\s*[23]|ประถมศึกษาปีที่\s*[23])/.test(gradeLevel);
+  const subjectPages = splitSubjectPages
+    ? [report.rows.slice(0, 8), report.rows.slice(8)]
+    : [report.rows];
+  const summaryPageNumber = subjectPages.length + 1;
 
-        <div className="student-heading-line mt-2 mb-2 px-1">
-          <span>เลขที่ <span className="underline px-4">{s.no}</span></span>
-          <span className="student-name">ชื่อ - สกุล <span className="underline px-3">{fullName(s)}</span></span>
-        </div>
+  const renderSubjectPage = (
+    rows: StudentReport["rows"],
+    pageNumber: number
+  ) => (
+    <div key={`subjects-${pageNumber}`} className="print-page sheet evaluation-sheet">
+      <div className="report-page-number">หน้า {pageNumber}</div>
+      <ReportHeader school={school} cls={cls} title={title} />
 
-        <table className="report-table evaluation-report-table">
+      <div className="student-heading-line mt-2 mb-2 px-1">
+        <span>เลขที่ <span className="underline px-4">{s.no}</span></span>
+        <span className="student-name">ชื่อ - สกุล <span className="underline px-3">{fullName(s)}</span></span>
+      </div>
+
+      <table className="report-table evaluation-report-table">
         <thead>
           <tr>
             <th style={{ width: "5%" }}>ที่</th>
@@ -94,7 +103,7 @@ export default function PersonReportSheet({
           </tr>
         </thead>
         <tbody>
-          {report.rows.map((r) => {
+          {rows.map((r) => {
             const grade = isYear ? r.yearGrade : term === "1" ? r.sem1Grade : r.sem2Grade;
             const score = isYear ? r.yearAvg : term === "1" ? r.sem1Total : r.sem2Total;
             const rubric = rubricByOrder.get(r.subject.order_no);
@@ -109,11 +118,11 @@ export default function PersonReportSheet({
             );
           })}
         </tbody>
-        </table>
+      </table>
 
-        <div className="grow" />
+      <div className="grow" />
 
-        <div className="grid grid-cols-3 gap-8 mt-5 text-center text-[12px] report-signatures">
+      <div className="grid grid-cols-3 gap-8 mt-5 text-center text-[12px] report-signatures">
         <div>
           <div>ลงชื่อ ...................................................</div>
           <div className="mt-1">( {cls?.homeroom_teacher_name || "..............................."} )</div>
@@ -129,11 +138,16 @@ export default function PersonReportSheet({
           <div className="mt-1">( {school?.director || "..............................."} )</div>
           <div>{school?.director_position || `ผู้อำนวยการโรงเรียน${school?.name || ""}`}</div>
         </div>
-        </div>
       </div>
+    </div>
+  );
+
+  return (
+    <>
+      {subjectPages.map((rows, index) => renderSubjectPage(rows, index + 1))}
 
       <div className="print-page sheet evaluation-sheet summary-sheet">
-        <div className="report-page-number">หน้า 2</div>
+        <div className="report-page-number">หน้า {summaryPageNumber}</div>
         <ReportHeader
           school={school}
           cls={cls}
@@ -222,3 +236,4 @@ export default function PersonReportSheet({
     </>
   );
 }
+
