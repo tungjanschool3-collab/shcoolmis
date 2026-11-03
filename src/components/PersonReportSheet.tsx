@@ -83,7 +83,10 @@ export default function PersonReportSheet({
     rows: StudentReport["rows"],
     pageNumber: number
   ) => (
-    <div key={`subjects-${pageNumber}`} className="print-page sheet evaluation-sheet">
+    <div
+      key={`subjects-${pageNumber}`}
+      className={`print-page sheet evaluation-sheet${splitSubjectPages ? " split-subject-pages" : ""}`}
+    >
       <div className="report-page-number">หน้า {pageNumber}</div>
       <ReportHeader school={school} cls={cls} title={title} />
 
