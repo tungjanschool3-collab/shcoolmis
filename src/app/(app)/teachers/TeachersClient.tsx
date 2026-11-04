@@ -12,6 +12,7 @@ export default function TeachersClient({ teachers }: { teachers: Profile[] }) {
   const [msg, setMsg] = useState<{ type: "ok" | "err"; text: string } | null>(null);
   const [, startTransition] = useTransition();
   const [busy, setBusy] = useState(false);
+  const [account, setAccount] = useState("");
   const { requestDelete, deletePasswordDialog } = usePasswordDelete();
 
   function refresh() {
@@ -28,6 +29,7 @@ export default function TeachersClient({ teachers }: { teachers: Profile[] }) {
     if (res.ok) {
       setMsg({ type: "ok", text: "เพิ่มครูสำเร็จ" });
       (e.target as HTMLFormElement).reset();
+      setAccount("");
       setShowForm(false);
       refresh();
     } else {
@@ -89,16 +91,35 @@ export default function TeachersClient({ teachers }: { teachers: Profile[] }) {
           className="bg-white rounded-xl shadow-sm border border-slate-100 p-5 grid sm:grid-cols-2 gap-4"
         >
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">อีเมลจริง *</label>
+            <label className="block text-sm font-medium text-slate-700 mb-1">อีเมลหรือ username *</label>
             <input
-              name="email"
-              type="email"
+              name="account"
+              type="text"
               required
+              value={account}
+              onChange={(event) => setAccount(event.target.value)}
               className="w-full rounded-lg border border-slate-300 px-3 py-2"
-              placeholder="teacher@school.ac.th"
+              placeholder="teacher@school.ac.th หรือ somchai"
             />
-            <p className="text-xs text-slate-400 mt-1">ระบบจะส่งลิงก์เชิญให้ครูตั้งรหัสผ่านเอง</p>
+            <p className="text-xs text-slate-400 mt-1">
+              {account.includes("@") ? "ระบบจะส่งลิงก์เชิญให้ครูตั้งรหัสผ่านเอง" : "username ใช้อักษรอังกฤษ ตัวเลข จุด ขีดกลาง หรือขีดล่าง"}
+            </p>
           </div>
+          {!account.includes("@") && (
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-1">รหัสผ่านเริ่มต้น *</label>
+              <input
+                name="initial_password"
+                type="password"
+                minLength={6}
+                required
+                autoComplete="new-password"
+                className="w-full rounded-lg border border-slate-300 px-3 py-2"
+                placeholder="อย่างน้อย 6 ตัวอักษร"
+              />
+              <p className="text-xs text-slate-400 mt-1">แจ้ง username และรหัสผ่านนี้ให้ครูเข้าสู่ระบบ</p>
+            </div>
+          )}
           <div>
             <label className="block text-sm font-medium text-slate-700 mb-1">ชื่อ-นามสกุล</label>
             <input
@@ -192,8 +213,9 @@ export default function TeachersClient({ teachers }: { teachers: Profile[] }) {
       </div>
 
       <p className="text-xs text-slate-400">
-        ครูจะได้รับอีเมลเชิญและตั้งรหัสผ่านด้วยตนเอง
+        บัญชีอีเมลจะได้รับลิงก์เชิญ ส่วนบัญชี username ใช้รหัสผ่านเริ่มต้นที่ผู้ดูแลกำหนด
       </p>
     </div>
   );
 }
+
