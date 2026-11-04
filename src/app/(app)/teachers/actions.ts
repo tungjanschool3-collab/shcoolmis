@@ -5,6 +5,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { revalidatePath } from "next/cache";
 import { requireAdmin } from "@/lib/auth";
 import { getActiveSchool } from "@/lib/school-context";
+import { usernameToEmail } from "@/lib/username";
 
 async function assertAdmin() {
   const supabase = await createClient();
@@ -34,18 +35,34 @@ export async function createTeacher(formData: FormData): Promise<ActionResult> {
     const profile = await requireAdmin();
     const activeSchool = await getActiveSchool(profile);
     if (!activeSchool) return { ok: false, error: "กรุณาเลือกโรงเรียนก่อนเพิ่มครู" };
-    const email = String(formData.get("email") || "").trim().toLowerCase();
+    const account = String(formData.get("account") || "").trim().toLowerCase();
+    const initialPassword = String(formData.get("initial_password") || "");
     const full_name = String(formData.get("full_name") || "").trim();
     const position = String(formData.get("position") || "").trim();
     const role = String(formData.get("role") || "teacher");
 
-    if (!email || !email.includes("@")) return { ok: false, error: "กรุณากรอกอีเมลจริง" };
+    if (!account) return { ok: false, error: "กรุณากรอกอีเมลหรือ username" };
+    const isEmail = account.includes("@");
+    if (!isEmail && !/^[a-z0-9._-]+$/.test(account)) {
+      return { ok: false, error: "username ใช้ได้เฉพาะ a-z, 0-9, จุด, ขีดกลาง และขีดล่าง" };
+    }
+    if (!isEmail && initialPassword.length < 6) {
+      return { ok: false, error: "บัญชี username ต้องกำหนดรหัสผ่านเริ่มต้นอย่างน้อย 6 ตัวอักษร" };
+    }
 
     const admin = createAdminClient();
-    const { data: created, error: createErr } = await admin.auth.admin.inviteUserByEmail(email, {
-      redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL || "https://shcoolmis.vercel.app"}/auth/callback?next=/set-password`,
-      data: { full_name },
-    });
+    const authEmail = usernameToEmail(account);
+    const { data: created, error: createErr } = isEmail
+      ? await admin.auth.admin.inviteUserByEmail(authEmail, {
+          redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL || "https://shcoolmis.vercel.app"}/auth/callback?next=/set-password`,
+          data: { full_name },
+        })
+      : await admin.auth.admin.createUser({
+          email: authEmail,
+          password: initialPassword,
+          email_confirm: true,
+          user_metadata: { full_name },
+        });
     if (createErr || !created.user) {
       const msg = createErr?.message || "";
       if (msg.includes("registered")) return { ok: false, error: "ชื่อผู้ใช้นี้มีอยู่แล้ว" };
@@ -55,7 +72,7 @@ export async function createTeacher(formData: FormData): Promise<ActionResult> {
     const { error: profErr } = await admin.from("profiles").insert({
       id: created.user.id,
       school_id: activeSchool.id,
-      username: email,
+      username: account,
       full_name,
       position,
       role: role === "school_admin" ? "school_admin" : "teacher",
@@ -127,3 +144,4 @@ export async function deleteTeacher(userId: string): Promise<ActionResult> {
     return { ok: false, error: (e as Error).message };
   }
 }
+
