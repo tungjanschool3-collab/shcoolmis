@@ -65,7 +65,7 @@ export async function createClassRoom(formData: FormData): Promise<ActionResult>
   if (!grade_level) return { ok: false, error: "กรุณาระบุระดับชั้น" };
 
   const classDb = createAdminClient();
-  const { data: cls, error } = await supabase
+  const { data: cls, error } = await classDb
     .from("classes")
     .insert({
       school_id: activeSchool.id,
@@ -88,7 +88,7 @@ export async function createClassRoom(formData: FormData): Promise<ActionResult>
   };
 
   if (sourceClassId) {
-    const { data: sourceClass } = await supabase
+    const { data: sourceClass } = await classDb
       .from("classes")
       .select("id,school_id")
       .eq("id", sourceClassId)
@@ -165,13 +165,13 @@ export async function createClassRoom(formData: FormData): Promise<ActionResult>
     }
   } else if (seed) {
     // วิชา (ต้นทาง) — ดึง id กลับมาเพื่อจับคู่เทียบโอน
-    const { data: insertedSubjects } = await supabase
+    const { data: insertedSubjects } = await classDb
       .from("subjects")
       .insert(SUBJECT_TEMPLATE.map((t) => ({ ...t, class_id: classId })))
       .select("id, order_no");
 
     // วิชาเทียบโอน (ปลายทาง)
-    const { data: insertedTransfer } = await supabase
+    const { data: insertedTransfer } = await classDb
       .from("transfer_subjects")
       .insert(TRANSFER_SUBJECT_TEMPLATE.map((t) => ({ ...t, class_id: classId })))
       .select("id, order_no");
