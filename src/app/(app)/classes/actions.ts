@@ -1,6 +1,7 @@
 "use server";
 
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { requireProfile } from "@/lib/auth";
 import {
   SUBJECT_TEMPLATE,
@@ -63,6 +64,7 @@ export async function createClassRoom(formData: FormData): Promise<ActionResult>
 
   if (!grade_level) return { ok: false, error: "กรุณาระบุระดับชั้น" };
 
+  const classDb = createAdminClient();
   const { data: cls, error } = await supabase
     .from("classes")
     .insert({
@@ -81,7 +83,7 @@ export async function createClassRoom(formData: FormData): Promise<ActionResult>
   if (error || !cls) return { ok: false, error: error?.message || "สร้างห้องไม่สำเร็จ" };
   const classId = cls.id as string;
   const failCopiedClass = async (message: string): Promise<ActionResult> => {
-    await supabase.from("classes").delete().eq("id", classId);
+    await classDb.from("classes").delete().eq("id", classId);
     return { ok: false, error: message };
   };
 
@@ -94,16 +96,16 @@ export async function createClassRoom(formData: FormData): Promise<ActionResult>
       .neq("academic_year_id", yearRow.id)
       .maybeSingle();
     if (!sourceClass) {
-      await supabase.from("classes").delete().eq("id", classId);
+      await classDb.from("classes").delete().eq("id", classId);
       return { ok: false, error: "ไม่พบห้องเรียนปีเก่าที่เลือก" };
     }
 
     const [subjectsResult, activitiesResult, levelsResult, itemsResult, transferResult] = await Promise.all([
-      supabase.from("subjects").select("*").eq("class_id", sourceClassId).order("order_no"),
-      supabase.from("activities").select("*").eq("class_id", sourceClassId).order("order_no"),
-      supabase.from("subject_competency_levels").select("*").eq("class_id", sourceClassId).order("order_no"),
-      supabase.from("assessment_items").select("*").eq("class_id", sourceClassId).order("kind").order("no"),
-      supabase.from("transfer_subjects").select("*").eq("class_id", sourceClassId).order("order_no"),
+      classDb.from("subjects").select("*").eq("class_id", sourceClassId).order("order_no"),
+      classDb.from("activities").select("*").eq("class_id", sourceClassId).order("order_no"),
+      classDb.from("subject_competency_levels").select("*").eq("class_id", sourceClassId).order("order_no"),
+      classDb.from("assessment_items").select("*").eq("class_id", sourceClassId).order("kind").order("no"),
+      classDb.from("transfer_subjects").select("*").eq("class_id", sourceClassId).order("order_no"),
     ]);
     const readError = [subjectsResult.error, activitiesResult.error, levelsResult.error, itemsResult.error, transferResult.error].find(Boolean);
     if (readError) return failCopiedClass(`อ่านข้อมูลปีเก่าไม่สำเร็จ: ${readError.message}`);
@@ -115,7 +117,7 @@ export async function createClassRoom(formData: FormData): Promise<ActionResult>
 
     const subjectMap = new Map<string, string>();
     for (const row of oldSubjects ?? []) {
-      const { data, error: copyError } = await supabase.from("subjects").insert({
+      const { data, error: copyError } = await classDb.from("subjects").insert({
         class_id: classId, order_no: row.order_no, category: row.category, name: row.name,
         code: row.code, hours: row.hours, credits: row.credits, midterm_max: row.midterm_max,
         final_max: row.final_max, competency_text: row.competency_text, is_active: row.is_active,
@@ -124,41 +126,41 @@ export async function createClassRoom(formData: FormData): Promise<ActionResult>
       subjectMap.set(row.id, data.id);
     }
 
-    if (oldActivities?.length) { const { error: copyError } = await supabase.from("activities").insert(oldActivities.map((row) => ({ class_id: classId, order_no: row.order_no, code: row.code, name: row.name, hours: row.hours }))); if (copyError) return failCopiedClass(`คัดลอกกิจกรรมไม่สำเร็จ: ${copyError.message}`); }
-    if (oldLevels?.length) { const { error: copyError } = await supabase.from("subject_competency_levels").insert(oldLevels.map((row) => ({ class_id: classId, order_no: row.order_no, subject_name: row.subject_name, competency_text: row.competency_text, beginner_text: row.beginner_text, developing_text: row.developing_text, proficient_text: row.proficient_text, expert_text: row.expert_text }))); if (copyError) return failCopiedClass(`คัดลอกเกณฑ์ความสามารถไม่สำเร็จ: ${copyError.message}`); }
-    if (oldItems?.length) { const { error: copyError } = await supabase.from("assessment_items").insert(oldItems.map((row) => ({ class_id: classId, kind: row.kind, no: row.no, title: row.title, max_score: row.max_score }))); if (copyError) return failCopiedClass(`คัดลอกหัวข้อประเมินไม่สำเร็จ: ${copyError.message}`); }
+    if (oldActivities?.length) { const { error: copyError } = await classDb.from("activities").insert(oldActivities.map((row) => ({ class_id: classId, order_no: row.order_no, code: row.code, name: row.name, hours: row.hours }))); if (copyError) return failCopiedClass(`คัดลอกกิจกรรมไม่สำเร็จ: ${copyError.message}`); }
+    if (oldLevels?.length) { const { error: copyError } = await classDb.from("subject_competency_levels").insert(oldLevels.map((row) => ({ class_id: classId, order_no: row.order_no, subject_name: row.subject_name, competency_text: row.competency_text, beginner_text: row.beginner_text, developing_text: row.developing_text, proficient_text: row.proficient_text, expert_text: row.expert_text }))); if (copyError) return failCopiedClass(`คัดลอกเกณฑ์ความสามารถไม่สำเร็จ: ${copyError.message}`); }
+    if (oldItems?.length) { const { error: copyError } = await classDb.from("assessment_items").insert(oldItems.map((row) => ({ class_id: classId, kind: row.kind, no: row.no, title: row.title, max_score: row.max_score }))); if (copyError) return failCopiedClass(`คัดลอกหัวข้อประเมินไม่สำเร็จ: ${copyError.message}`); }
 
     const transferMap = new Map<string, string>();
     for (const row of oldTransferSubjects ?? []) {
-      const { data, error: copyError } = await supabase.from("transfer_subjects").insert({ class_id: classId, order_no: row.order_no, category: row.category, code: row.code, name: row.name, credits: row.credits, enabled: row.enabled }).select("id").single();
+      const { data, error: copyError } = await classDb.from("transfer_subjects").insert({ class_id: classId, order_no: row.order_no, category: row.category, code: row.code, name: row.name, credits: row.credits, enabled: row.enabled }).select("id").single();
       if (copyError || !data) return failCopiedClass(copyError?.message || "คัดลอกรายวิชาเทียบโอนไม่สำเร็จ");
       transferMap.set(row.id, data.id);
     }
     if (transferMap.size) {
-      const { data: oldSources, error: sourceReadError } = await supabase.from("transfer_sources").select("transfer_subject_id,subject_id").in("transfer_subject_id", [...transferMap.keys()]);
+      const { data: oldSources, error: sourceReadError } = await classDb.from("transfer_sources").select("transfer_subject_id,subject_id").in("transfer_subject_id", [...transferMap.keys()]);
       if (sourceReadError) return failCopiedClass(`อ่านการจับคู่วิชาปีเก่าไม่สำเร็จ: ${sourceReadError.message}`);
       const links = (oldSources ?? []).flatMap((row) => {
         const transferSubjectId = transferMap.get(row.transfer_subject_id);
         const subjectId = subjectMap.get(row.subject_id);
         return transferSubjectId && subjectId ? [{ transfer_subject_id: transferSubjectId, subject_id: subjectId }] : [];
       });
-      if (links.length) { const { error: copyError } = await supabase.from("transfer_sources").insert(links); if (copyError) return failCopiedClass(`คัดลอกการจับคู่วิชาไม่สำเร็จ: ${copyError.message}`); }
+      if (links.length) { const { error: copyError } = await classDb.from("transfer_sources").insert(links); if (copyError) return failCopiedClass(`คัดลอกการจับคู่วิชาไม่สำเร็จ: ${copyError.message}`); }
     }
 
     if (subjectMap.size) {
-      const { data: oldConfigs, error: configReadError } = await supabase.from("learning_outcome_configs").select("*").in("subject_id", [...subjectMap.keys()]);
+      const { data: oldConfigs, error: configReadError } = await classDb.from("learning_outcome_configs").select("*").in("subject_id", [...subjectMap.keys()]);
       if (configReadError) return failCopiedClass(`อ่านผลลัพธ์การเรียนรู้ปีเก่าไม่สำเร็จ: ${configReadError.message}`);
       for (const oldConfig of oldConfigs ?? []) {
         const newSubjectId = subjectMap.get(oldConfig.subject_id);
         if (!newSubjectId) continue;
-        const { data: newConfig, error: configCopyError } = await supabase.from("learning_outcome_configs").insert({
+        const { data: newConfig, error: configCopyError } = await classDb.from("learning_outcome_configs").insert({
           subject_id: newSubjectId, term: oldConfig.term, target_max: oldConfig.target_max,
           calculation_method: oldConfig.calculation_method, status: "draft", created_by: profile.id,
         }).select("id").single();
         if (configCopyError || !newConfig) return failCopiedClass(configCopyError?.message || "คัดลอกชุดผลลัพธ์การเรียนรู้ไม่สำเร็จ");
-        const { data: oldIndicators, error: indicatorReadError } = await supabase.from("learning_outcome_indicators").select("*").eq("config_id", oldConfig.id).order("order_no");
+        const { data: oldIndicators, error: indicatorReadError } = await classDb.from("learning_outcome_indicators").select("*").eq("config_id", oldConfig.id).order("order_no");
         if (indicatorReadError) return failCopiedClass(`อ่านตัวชี้วัดปีเก่าไม่สำเร็จ: ${indicatorReadError.message}`);
-        if (oldIndicators?.length) { const { error: indicatorCopyError } = await supabase.from("learning_outcome_indicators").insert(oldIndicators.map((row) => ({ config_id: newConfig.id, order_no: row.order_no, code: row.code, title: row.title, max_score: row.max_score, weight_percent: row.weight_percent }))); if (indicatorCopyError) return failCopiedClass(`คัดลอกตัวชี้วัดไม่สำเร็จ: ${indicatorCopyError.message}`); }
+        if (oldIndicators?.length) { const { error: indicatorCopyError } = await classDb.from("learning_outcome_indicators").insert(oldIndicators.map((row) => ({ config_id: newConfig.id, order_no: row.order_no, code: row.code, title: row.title, max_score: row.max_score, weight_percent: row.weight_percent }))); if (indicatorCopyError) return failCopiedClass(`คัดลอกตัวชี้วัดไม่สำเร็จ: ${indicatorCopyError.message}`); }
       }
     }
   } else if (seed) {
@@ -183,13 +185,13 @@ export async function createClassRoom(formData: FormData): Promise<ActionResult>
           return subjectId ? { transfer_subject_id: t.id, subject_id: subjectId } : null;
         })
         .filter((x): x is { transfer_subject_id: string; subject_id: string } => x !== null);
-      if (links.length) await supabase.from("transfer_sources").insert(links);
+      if (links.length) await classDb.from("transfer_sources").insert(links);
     }
 
-    await supabase.from("activities").insert(
+    await classDb.from("activities").insert(
       ACTIVITY_TEMPLATE.map((t) => ({ ...t, class_id: classId }))
     );
-    await supabase.from("subject_competency_levels").insert(
+    await classDb.from("subject_competency_levels").insert(
       SUBJECT_COMPETENCY_TEMPLATE.map((t) => ({ ...t, class_id: classId }))
     );
     const items = [
@@ -215,7 +217,7 @@ export async function createClassRoom(formData: FormData): Promise<ActionResult>
         max_score: 3,
       })),
     ];
-    await supabase.from("assessment_items").insert(items);
+    await classDb.from("assessment_items").insert(items);
   }
 
   revalidatePath("/classes");
